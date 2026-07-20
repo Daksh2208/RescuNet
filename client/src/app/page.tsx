@@ -1,9 +1,17 @@
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import ModulesSection from "@/components/ModulesSection";
+import Features from "@/components/Features";
+import Footer from "@/components/Footer";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold">
-        🚩 Welcome to ResQNet
-      </h1>
+    <main className="min-h-screen bg-background">
+      <Navbar />
+      <Hero />
+      <ModulesSection />
+      <Features />
+      <Footer />
     </main>
   );
 }
