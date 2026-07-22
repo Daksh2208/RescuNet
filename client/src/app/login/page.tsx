@@ -38,8 +38,19 @@ export default function LoginPage() {
         res.data.accessToken
       );
 
-      router.push("/");
-
+      const userRole = String(res.data.user?.role || res.data.role || "citizen").toLowerCase();
+      
+      if (userRole === "citizen") {
+        router.push("/citizen");
+      } else if (userRole === "rescue") {
+        router.push("/rescue");
+      } else if (userRole === "admin") {
+        router.push("/admin");
+      } else if (userRole === "volunteer") {
+        router.push("/volunteer");
+      } else {
+        router.push("/citizen");
+      }
     } catch (err: any) {
 
       alert(

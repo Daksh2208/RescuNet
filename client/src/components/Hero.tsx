@@ -1,4 +1,5 @@
 
+"use client";
 
 import Link from "next/link";
 import { ArrowRight, Activity, MapPin, RadioReceiver } from "lucide-react";
