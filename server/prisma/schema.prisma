@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                    String         @id @default(uuid())
+  fullName              String
+  email                 String         @unique
+  password              String
+  phone                 String         @unique
+  role                  UserRole       @default(CITIZEN)
+  isVerified            Boolean        @default(false)
+  isActive              Boolean        @default(true)
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  assignedBy            Assignment[]   @relation("AssignedBy")
+  rescueAssignments     Assignment[]   @relation("RescueTeam")
+  reportedIncidents     Incident[]     @relation("ReportedBy")
+  verifiedIncidents     Incident[]     @relation("VerifiedBy")
+  notifications         Notification[]
+  refreshTokens         RefreshToken[]
+}
+
+model Incident {
+  id           String          @id @default(uuid())
+  title        String
+  description  String
+  disasterType DisasterType
+  severity     Severity
+  status       IncidentStatus  @default(PENDING)
+  latitude     Float
+  longitude    Float
+  address      String
+  reportedById String
+  verifiedById String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  aiAnalysis   AIAnalysis?
+  assignments  Assignment[]
+  reportedBy   User            @relation("ReportedBy", fields: [reportedById], references: [id])
+  verifiedBy   User?           @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  images       IncidentImage[]
+}
+
+model IncidentImage {
+  id         String   @id @default(uuid())
+  imageUrl   String
+  incidentId String
+  createdAt  DateTime @default(now())
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+}
+
+model Assignment {
+  id           String           @id @default(uuid())
+  incidentId   String
+  rescueTeamId String
+  assignedById String
+  status       AssignmentStatus @default(PENDING)
+  assignedAt   DateTime         @default(now())
+  acceptedAt   DateTime?
+  completedAt  DateTime?
+  assignedBy   User             @relation("AssignedBy", fields: [assignedById], references: [id])
+  incident     Incident         @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  rescueTeam   User             @relation("RescueTeam", fields: [rescueTeamId], references: [id])
+}
+
+model Shelter {
+  id            String   @id @default(uuid())
+  name          String
+  address       String
+  latitude      Float
+  longitude     Float
+  capacity      Int
+  occupied      Int      @default(0)
+  contactNumber String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Resource {
+  id           String           @id @default(uuid())
+  name         String
+  category     ResourceCategory
+  quantity     Int
+  unit         String
+  locationName String
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AIAnalysis {
+  id             String   @id @default(uuid())
+  incidentId     String   @unique
+  priority       Severity
+  summary        String
+  recommendation String
+  aiResponse     String
+  createdAt      DateTime @default(now())
+  incident       Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+}
+
+model SafetyGuideline {
+  id           String       @id @default(uuid())
+  disasterType DisasterType
+  title        String
+  description  String
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  ADMIN
+  CITIZEN
+  RESCUE
+  VOLUNTEER
+}
+
+enum DisasterType {
+  FLOOD
+  EARTHQUAKE
+  FIRE
+  CYCLONE
+  LANDSLIDE
+  OTHER
+}
+
+enum IncidentStatus {
+  PENDING
+  VERIFIED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+}
+
+enum ResourceCategory {
+  FOOD
+  WATER
+  MEDICINE
+  EQUIPMENT
+}
