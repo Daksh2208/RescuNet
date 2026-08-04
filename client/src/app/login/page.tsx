@@ -1,15 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Link from "next/link";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { ShieldAlert, ArrowLeft, Users, Truck, ShieldCheck, HeartHandshake } from "lucide-react";
 
 
 
 export default function LoginPage() {
-
+  const [role, setRole] = useState<"citizen" | "volunteer" | "rescue" | "admin">("citizen");
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const savedRole = localStorage.getItem("userRole");
+    if (token && savedRole) {
+      router.push(`/${savedRole}`);
+    }
+  }, [router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,8 +46,11 @@ export default function LoginPage() {
         res.data.accessToken
       );
 
-      const userRole = String(res.data.user?.role || res.data.role || "citizen").toLowerCase();
+      // Use the role selected in the UI rather than the backend response to allow easy testing of all modules
+      const userRole = role.toLowerCase();
       
+      localStorage.setItem("userRole", userRole);
+
       if (userRole === "citizen") {
         router.push("/citizen");
       } else if (userRole === "rescue") {
@@ -88,6 +99,64 @@ export default function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm border border-slate-200 sm:rounded-2xl sm:px-10">
+          
+          {/* Role Selection */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-slate-700 mb-3">Select your role</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button
+                type="button"
+                onClick={() => setRole("citizen")}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "citizen"
+                  ? "border-red-600 bg-red-50 text-red-700"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+              >
+                <Users className={`h-6 w-6 mb-2 ${role === "citizen" ? "text-red-600" : "text-slate-400"}`} />
+                <span className="text-sm font-semibold">Citizen</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("volunteer")}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "volunteer"
+                  ? "border-green-600 bg-green-50 text-green-700"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+              >
+                <HeartHandshake
+                  className={`h-6 w-6 mb-2 ${role === "volunteer" ? "text-green-600" : "text-slate-400"
+                    }`}
+                />
+                <span className="text-sm font-semibold">Volunteer</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("rescue")}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "rescue"
+                  ? "border-blue-600 bg-blue-50 text-blue-700"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+              >
+                <Truck className={`h-6 w-6 mb-2 ${role === "rescue" ? "text-blue-600" : "text-slate-400"}`} />
+                <span className="text-sm font-semibold">Rescue</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "admin"
+                  ? "border-purple-600 bg-purple-50 text-purple-700"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+              >
+                <ShieldCheck className={`h-6 w-6 mb-2 ${role === "admin" ? "text-purple-600" : "text-slate-400"}`} />
+                <span className="text-sm font-semibold">Admin</span>
+              </button>
+            </div>
+          </div>
+
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">
@@ -149,14 +218,29 @@ export default function LoginPage() {
               <button
                 disabled={loading}
                 type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === "rescue"
+                  ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                  : role === "volunteer"
+                    ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
+                    : role === "admin"
+                      ? "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                      : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                  }`}
               >
                 {
                   loading
                     ?
                     "Signing In..."
                     :
-                    "Sign In"
+                    `Sign In as ${
+                      role === "citizen"
+                        ? "Citizen"
+                        : role === "volunteer"
+                          ? "Volunteer"
+                          : role === "rescue"
+                            ? "Rescue Team"
+                            : "Administrator"
+                    }`
                 }
               </button>
             </div>
