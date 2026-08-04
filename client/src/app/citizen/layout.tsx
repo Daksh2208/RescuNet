@@ -35,8 +35,6 @@ export default function CitizenLayout({
     { name: "Shelters & Maps", href: "/citizen/shelters", icon: Map },
     { name: "Reunification", href: "/citizen/reunification", icon: Users },
     { name: "Community Aid", href: "/citizen/community", icon: HeartHandshake },
-    { name: "Mesh Network", href: "/citizen/mesh", icon: Wifi },
-    { name: "Offline Vault", href: "/citizen/vault", icon: Lock },
     { name: "Safety Guides", href: "/citizen/guides", icon: BookOpen },
     { name: "Profile", href: "/citizen/profile", icon: User },
   ];

@@ -154,22 +154,6 @@ export default function CitizenDashboard() {
         </Link>
 
         <Link 
-          href="/citizen/mesh"
-          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between min-h-[160px]"
-        >
-          <div>
-            <div className="h-12 w-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 text-indigo-600">
-              <Wifi className="h-6 w-6" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-1 leading-tight">Offline Mesh<br/>Network</h2>
-            <p className="text-slate-500 text-sm mt-2">P2P emergency comms</p>
-          </div>
-          <div className="flex items-center text-indigo-600 text-sm font-medium mt-4 group-hover:gap-2 transition-all">
-            Configure <ArrowRight className="h-4 w-4 ml-1" />
-          </div>
-        </Link>
-
-        <Link 
           href="/citizen/guides"
           className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between min-h-[160px]"
         >
@@ -182,22 +166,6 @@ export default function CitizenDashboard() {
           </div>
           <div className="flex items-center text-teal-600 text-sm font-medium mt-4 group-hover:gap-2 transition-all">
             Read Guides <ArrowRight className="h-4 w-4 ml-1" />
-          </div>
-        </Link>
-
-        <Link 
-          href="/citizen/vault"
-          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between min-h-[160px]"
-        >
-          <div>
-            <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center mb-4 text-slate-700">
-              <Lock className="h-6 w-6" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-1 leading-tight">Offline Document<br/>Vault</h2>
-            <p className="text-slate-500 text-sm mt-2">Secure IDs & Insurance</p>
-          </div>
-          <div className="flex items-center text-slate-700 text-sm font-medium mt-4 group-hover:gap-2 transition-all">
-            Open Vault <ArrowRight className="h-4 w-4 ml-1" />
           </div>
         </Link>
       </div>
