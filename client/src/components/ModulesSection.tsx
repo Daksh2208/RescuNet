@@ -1,13 +1,34 @@
 
+"use client";
 
-import { Users, Truck, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Users, Truck, ShieldCheck, CheckCircle2, HeartHandshake } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ModulesSection() {
+  const router = useRouter();
+
+  const handleModuleClick = (targetRole: string) => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    const userRole = typeof window !== "undefined" ? localStorage.getItem("userRole") : null;
+
+    if (!token || !userRole) {
+      router.push("/login");
+      return;
+    }
+
+    if (userRole === targetRole) {
+      router.push(`/${userRole}`);
+    } else {
+      alert(`Unauthorized. You are logged in as a ${userRole}.`);
+    }
+  };
+
   const modules = [
     {
       title: "Citizen Module",
-      icon: <Users className="h-8 w-8 text-blue-400" />,
-      color: "from-blue-500/20 to-transparent border-blue-500/20",
+      targetRole: "citizen",
+      icon: <Users className="h-8 w-8 text-red-500" />,
+      color: "from-red-500/20 to-transparent border-red-500/20",
       description: "Empowering individuals to report emergencies, track status, and find safety.",
       features: [
         "Report Human & Animal Emergencies",
@@ -18,8 +39,9 @@ export default function ModulesSection() {
     },
     {
       title: "Rescue Team Module",
-      icon: <Truck className="h-8 w-8 text-orange-400" />,
-      color: "from-orange-500/20 to-transparent border-orange-500/20",
+      targetRole: "rescue",
+      icon: <Truck className="h-8 w-8 text-blue-500" />,
+      color: "from-blue-500/20 to-transparent border-blue-500/20",
       description: "Equipping responders with real-time navigation and task management tools.",
       features: [
         "Accept & Manage Rescue Tasks",
@@ -29,8 +51,22 @@ export default function ModulesSection() {
       ],
     },
     {
+      title: "Volunteer Module",
+      targetRole: "volunteer",
+      icon: <HeartHandshake className="h-8 w-8 text-green-500" />,
+      color: "from-green-500/20 to-transparent border-green-500/20",
+      description: "Connecting compassionate individuals with shelters, logistics, and on-ground relief efforts.",
+      features: [
+        "Claim Relief & Supply Tasks",
+        "Shelter Assistance Tracking",
+        "Animal Foster Coordination",
+        "Logistics & Transport Updates",
+      ],
+    },
+    {
       title: "Administrator Module",
-      icon: <ShieldCheck className="h-8 w-8 text-purple-400" />,
+      targetRole: "admin",
+      icon: <ShieldCheck className="h-8 w-8 text-purple-500" />,
       color: "from-purple-500/20 to-transparent border-purple-500/20",
       description: "Centralized control for verification, dispatch, and resource management.",
       features: [
@@ -57,11 +93,12 @@ export default function ModulesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {modules.map((mod, index) => (
             <div
               key={index}
-              className={`bg-white shadow-sm border border-slate-100 rounded-3xl p-8 border-t-4 hover:-translate-y-1 transition-transform duration-300 ${mod.color}`}
+              onClick={() => handleModuleClick(mod.targetRole)}
+              className={`cursor-pointer bg-white shadow-sm border border-slate-100 rounded-3xl p-8 border-t-4 hover:-translate-y-1 transition-transform duration-300 ${mod.color}`}
             >
               <div className="mb-6 p-4 bg-slate-50 rounded-2xl inline-block border border-slate-100">
                 {mod.icon}

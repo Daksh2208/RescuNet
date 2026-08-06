@@ -1,4 +1,5 @@
 
+"use client";
 
 import { BrainCircuit, Database, Map, PieChart, Lock, Globe } from "lucide-react";
 
