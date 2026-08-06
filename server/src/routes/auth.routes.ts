@@ -1,10 +1,12 @@
 import { Router } from "express";
 
-import { login, register } from "../controllers/auth.controller.js";
+import { login, logout, refresh, register } from "../controllers/auth.controller.js";
 
 import { loginValidator, registerValidator } from "../validators/auth.validator.js";
 
 import { validate } from "../middleware/validate.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+import { me } from "../controllers/user.controller.js";
 
 const router = Router();
 
@@ -22,9 +24,11 @@ router.post(
   login
 );
 
-// router.post("/refresh");
+router.post("/refresh", refresh);
 
-// router.post("/logout");
+router.post("/logout", logout);
+
+router.get("/me", authenticate, me);
 
 // router.post("/forgot-password");
 

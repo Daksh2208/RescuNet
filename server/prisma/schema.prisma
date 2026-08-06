@@ -42,6 +42,7 @@ model Incident {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   aiAnalysis   AIAnalysis?
+  isAiProcessed Boolean @default(false)
   assignments  Assignment[]
   reportedBy   User            @relation("ReportedBy", fields: [reportedById], references: [id])
   verifiedBy   User?           @relation("VerifiedBy", fields: [verifiedById], references: [id])

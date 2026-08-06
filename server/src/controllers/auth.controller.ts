@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
-import { registerUser } from "../services/auth.service.js";
+import { refreshAccessToken, registerUser } from "../services/auth.service.js";
 import { loginUser } from "../services/auth.service.js";
 import { prisma } from "../config/prisma.js";
+import type { AuthRequest } from "../middleware/auth.middleware.js";
 
 
 export const register = async (
@@ -83,5 +84,65 @@ export const logout = async (req: Request, res: Response) => {
         success: true,
         message: "Logged out",
     });
+
+};
+
+export const me = async (
+  req: AuthRequest,
+  res: Response
+) => {
+
+  const user = await prisma.user.findUnique({
+
+    where: {
+      id: req.user!.id,
+    },
+
+    select: {
+
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+
+    },
+
+  });
+
+  return res.json({
+
+    success: true,
+    user,
+
+  });
+
+};
+
+
+export const refresh = async (
+    req: Request,
+    res: Response
+) => {
+
+    try {
+
+        const refreshToken = req.cookies.refreshToken;
+
+        const accessToken = await refreshAccessToken(refreshToken);
+
+        return res.json({
+            success: true,
+            accessToken,
+        });
+
+    }
+    catch {
+
+        return res.status(401).json({
+            success: false,
+            message: "Session expired",
+        });
+
+    }
 
 };

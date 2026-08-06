@@ -1,6 +1,8 @@
 import { PrismaClient, UserRole } from "@prisma/client";
 import { hashPassword } from "../utils/hash.js";
 import { prisma } from "../config/prisma.js";
+import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
 
 import { comparePassword } from "../utils/hash.js";
 import {
@@ -111,4 +113,40 @@ export const loginUser = async (
     accessToken,
     refreshToken,
   };
+};
+
+export const refreshAccessToken = async (refreshToken: string) => {
+
+    if (!refreshToken) {
+        throw new Error("Refresh token missing");
+    }
+
+    const decoded = jwt.verify(
+        refreshToken,
+        env.JWT_REFRESH_SECRET
+    ) as {
+        id: string;
+    };
+
+    const tokenInDb = await prisma.refreshToken.findUnique({
+        where: {
+            token: refreshToken,
+        },
+    });
+
+    if (!tokenInDb) {
+        throw new Error("Invalid refresh token");
+    }
+
+    const accessToken = jwt.sign(
+        {
+            id: decoded.id,
+        },
+        env.JWT_ACCESS_SECRET,
+        {
+            expiresIn: "15m",
+        }
+    );
+
+    return accessToken;
 };

@@ -3,7 +3,11 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
 export interface AuthRequest extends Request {
-    user?: any;
+     user?: {
+        id: string;
+        role: string;
+        email: string;
+    };
 }
 
 export const authenticate = (
@@ -28,7 +32,11 @@ export const authenticate = (
         req.user = jwt.verify(
             token,
             env.JWT_ACCESS_SECRET
-        );
+        ) as {
+            id: string;
+            role: string;
+            email: string;
+        };
 
         next();
 
