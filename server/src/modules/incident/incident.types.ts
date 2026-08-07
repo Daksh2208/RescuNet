@@ -11,4 +11,5 @@ export interface CreateIncidentDto {
   latitude: number;
   longitude: number;
   address: string;
+  imageUrl?:string;
 }

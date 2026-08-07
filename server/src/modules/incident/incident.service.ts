@@ -6,7 +6,10 @@ export const createIncident = async (
   userId: string
 ) => {
 
-  return await prisma.incident.create({
+    console.log("Service data:", data);
+
+
+  const incident = await prisma.incident.create({
     data: {
       title: data.title,
       description: data.description,
@@ -27,6 +30,25 @@ export const createIncident = async (
       },
     },
   });
+
+  console.log("Image URL:", data.imageUrl);
+
+  if (data.imageUrl) {
+
+    await prisma.incidentImage.create({
+
+        data:{
+
+            incidentId:incident.id,
+            imageUrl:data.imageUrl
+
+        }
+
+    });
+
+}
+
+return incident;
 
 };
 
@@ -99,3 +121,4 @@ export const getIncidentById = async (
   return incident;
 
 };
+

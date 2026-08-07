@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, MapPin, Camera, Send, PawPrint, Users } from "lucide-react";
 import Link from "next/link";
 import { reportIncident } from "@/lib/incident";
 import { useRouter } from "next/navigation";
+import { uploadImage } from "@/lib/upload";
 
 export default function ReportEmergencyPage() {
   const [target, setTarget] = useState<"human" | "animal" | "both">("human");
@@ -16,52 +17,171 @@ export default function ReportEmergencyPage() {
     severity: "MEDIUM",
     latitude: 0,
     longitude: 0,
-    address: ""
+    address: "",
   });
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
-  const handleSubmit = async (
+  // const handleImageUpload = async (
 
-    e: React.FormEvent
+  //   e: React.ChangeEvent<HTMLInputElement>
 
+  // ) => {
+
+  //   if (!e.target.files?.length) return;
+
+  //   try {
+
+  //     const url = await uploadImage(
+
+  //       e.target.files[0]
+
+  //     );
+
+  //     // setForm(prev => ({
+
+  //     //   ...prev,
+
+  //     //   imageUrl: url
+
+  //     // }));
+
+
+  //     setForm(prev => {
+  //       const updated = {
+  //         ...prev,
+  //         imageUrl: url,
+  //       };
+
+  //       console.log("Updated form:", updated);
+
+  //       return updated;
+  //     });
+
+  //   } catch {
+
+  //     alert("Image upload failed");
+
+  //   }
+
+  // };
+
+  const handleImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
 
-    e.preventDefault();
+    if (!e.target.files?.length) return;
 
-    try {
+    setImageFile(e.target.files[0]);
 
-      setLoading(true);
+  };
 
-      await reportIncident(form);
 
-      setForm({
-        title: "",
-        description: "",
-        disasterType: "",
-        severity: "MEDIUM",
-        latitude: 0,
-        longitude: 0,
-        address: "",
-      });
+  // const handleSubmit = async (
 
-      router.push("/citizen/reports");
+  //   e: React.FormEvent
+
+  // ) => {
+
+  //   e.preventDefault();
+
+  //   try {
+
+  //     setLoading(true);
+
+  //     console.log("Handle Submit Form:", form);
+  //     console.log("Image URL:", form.imageUrl);
+
+  //     await reportIncident(form);
+
+  //     setForm({
+  //       title: "",
+  //       description: "",
+  //       disasterType: "",
+  //       severity: "MEDIUM",
+  //       latitude: 0,
+  //       longitude: 0,
+  //       address: "",
+  //       imageUrl: "",
+  //     });
+
+  //     router.push("/citizen/reports");
+
+  //   }
+  //   catch (err) {
+
+  //     alert(err);
+
+  //   }
+  //   finally {
+
+  //     setLoading(false);
+
+  //   }
+
+  // }
+
+  const handleSubmit = async (
+  e: React.FormEvent
+) => {
+
+  e.preventDefault();
+
+  try {
+
+    setLoading(true);
+
+    let imageUrl = "";
+
+    if (imageFile) {
+
+      imageUrl = await uploadImage(imageFile);
 
     }
-    catch (err) {
 
-      alert(err);
+    await reportIncident({
 
-    }
-    finally {
+      ...form,
 
-      setLoading(false);
+      imageUrl,
 
-    }
+    });
+
+    setForm({
+
+      title: "",
+      description: "",
+      disasterType: "",
+      severity: "MEDIUM",
+      latitude: 0,
+      longitude: 0,
+      address: "",
+
+    });
+
+    setImageFile(null);
+
+    router.push("/citizen/reports");
 
   }
+  catch (err) {
+
+    console.error(err);
+
+    alert("Failed to report incident");
+
+  }
+  finally {
+
+    setLoading(false);
+
+  }
+
+};
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -139,10 +259,10 @@ export default function ReportEmergencyPage() {
             type="text"
             value={form.title}
             onChange={(e) =>
-              setForm({
-                ...form,
+              setForm(prev => ({
+                ...prev,
                 title: e.target.value,
-              })
+              }))
             }
             placeholder="Short title"
             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50"
@@ -155,10 +275,10 @@ export default function ReportEmergencyPage() {
           <select
             value={form.disasterType}
             onChange={(e) =>
-              setForm({
-                ...form,
-                disasterType: e.target.value.toUpperCase(),
-              })
+              setForm(prev => ({
+                ...prev,
+                disasterType: e.target.value,
+              }))
             }
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none bg-slate-50"
           >
@@ -186,11 +306,17 @@ export default function ReportEmergencyPage() {
               placeholder="Searching for GPS signal..."
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-slate-50"
               value={form.address}
+              // onChange={(e) =>
+              //   setForm({
+              //     ...form,
+              //     address: e.target.value,
+              //   })
+              // }
               onChange={(e) =>
-                setForm({
-                  ...form,
+                setForm(prev => ({
+                  ...prev,
                   address: e.target.value,
-                })
+                }))
               }
             />
             <button type="button" className="absolute inset-y-0 right-2 flex items-center px-3 text-sm font-medium text-blue-600 hover:text-blue-700">
@@ -208,22 +334,61 @@ export default function ReportEmergencyPage() {
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-slate-50 resize-none"
             value={form.description}
             onChange={(e) =>
-              setForm({
-                ...form,
+              setForm(prev => ({
+                ...prev,
                 description: e.target.value,
-              })
+              }))
             }
           ></textarea>
         </div>
 
         {/* Photo Upload */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-bold text-slate-900 mb-2">Upload Photo (Optional)</label>
-          <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors">
-            <Camera className="h-8 w-8 text-slate-400 mb-3" />
-            <p className="text-sm font-medium text-slate-700">Tap to upload a photo</p>
-            <p className="text-xs text-slate-500 mt-1">Helps rescue teams assess the situation</p>
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-8">
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+            {form.imageUrl && (
+
+              <p className="text-green-600 mt-2">
+                ✅ Image Uploaded
+              </p>
+
+            )}
+
           </div>
+        </div> */}
+
+        {/* Photo Upload */}
+
+        <div>
+
+          <label className="block text-sm font-bold text-slate-900 mb-2">
+            Upload Photo (Optional)
+          </label>
+
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-8">
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+
+            {imageFile && (
+
+              <p className="text-green-600 mt-2">
+                ✅ {imageFile.name}
+              </p>
+
+            )}
+
+          </div>
+
         </div>
 
         {/* Submit */}

@@ -9,10 +9,12 @@ export const reportIncident = async (
 
   try {
 
+    console.log("Controller req.body:", req.body);
     const incident = await createIncident(
       req.body,
       req.user!.id
     );
+
 
     return res.status(201).json({
       success: true,
