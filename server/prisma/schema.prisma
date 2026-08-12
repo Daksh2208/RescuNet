@@ -74,16 +74,17 @@ model Assignment {
 }
 
 model Shelter {
-  id            String   @id @default(uuid())
+  id            String       @id @default(uuid())
   name          String
+  type          ShelterType  @default(HUMAN)
   address       String
   latitude      Float
   longitude     Float
   capacity      Int
-  occupied      Int      @default(0)
+  occupied      Int          @default(0)
   contactNumber String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Resource {
@@ -211,4 +212,10 @@ enum ReunificationType {
 enum ReunificationStatus {
   MISSING
   FOUND
+}
+
+enum ShelterType {
+  HUMAN
+  ANIMAL
+  VET
 }
