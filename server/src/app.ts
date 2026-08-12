@@ -7,6 +7,7 @@ import incidentRoutes from "./modules/incident/incident.routes.js"
 import uploadRoutes from "./modules/upload/upload.routes.js"
 import reunificationRoutes from "./routes/reunification.routes.js";
 import shelterRoutes from "./routes/shelter.routes.js";
+import communityRoutes from "./routes/community.routes.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/incidents", incidentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/reunification", reunificationRoutes);
 app.use("/api/shelters", shelterRoutes);
+app.use("/api/community", communityRoutes);
 
 app.get("/", (_, res) => {
   res.json({

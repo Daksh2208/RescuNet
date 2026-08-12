@@ -1,116 +1,398 @@
 "use client";
 
 import { useState } from "react";
-import { PackageOpen, Wrench, Send, AlertCircle, MapPin } from "lucide-react";
+import {
+  HeartHandshake,
+  MapPin,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export default function NewCommunityPostPage() {
-  const [postType, setPostType] = useState<"offer" | "request">("offer");
+import {
+  createCommunityPost,
+  CommunityPostType,
+} from "@/lib/community";
+
+export default function CommunityPostPage() {
+
+  const router = useRouter();
+
+  const [type, setType] =
+    useState<CommunityPostType>("OFFER");
+
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    location: "",
+    latitude: "",
+    longitude: "",
+  });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
+
+    e.preventDefault();
+
+    if (
+      !form.title ||
+      !form.description ||
+      !form.category ||
+      !form.location
+    ) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    try {
+
+      setLoading(true);
+
+      await createCommunityPost({
+        title: form.title,
+        description: form.description,
+        type,
+        category: form.category,
+        location: form.location,
+
+        latitude: form.latitude
+          ? Number(form.latitude)
+          : undefined,
+
+        longitude: form.longitude
+          ? Number(form.longitude)
+          : undefined,
+      });
+
+      alert(
+        "Community post created successfully!"
+      );
+
+      router.push("/citizen/community");
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Failed to create community post."
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
   return (
+
     <div className="max-w-2xl mx-auto space-y-6">
+
+      {/* Header */}
+
       <div className="flex items-center justify-between">
+
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">New Community Post</h1>
-          <p className="text-slate-500 text-sm mt-1">Offer resources or request aid from neighbors</p>
+
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+
+            <HeartHandshake className="h-6 w-6 text-orange-500" />
+
+            New Community Post
+
+          </h1>
+
+          <p className="text-slate-500 text-sm mt-1">
+            Offer help or request assistance from your community.
+          </p>
+
         </div>
-        <Link 
+
+        <Link
           href="/citizen/community"
-          className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200"
+          className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700"
         >
-          Cancel
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </Link>
+
       </div>
 
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex gap-3 shadow-sm">
-        <AlertCircle className="h-6 w-6 text-orange-600 shrink-0" />
-        <div className="text-sm text-orange-800 leading-relaxed">
-          <strong>Community Guidelines:</strong> Only request what you absolutely need to survive (e.g., water, basic first aid, tools for extraction). Do not use this board for non-emergencies.
-        </div>
-      </div>
 
-      <form className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
-        
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6"
+      >
+
         {/* Post Type */}
+
         <div>
-          <label className="block text-sm font-bold text-slate-900 mb-3">What do you want to do?</label>
-          <div className="grid grid-cols-2 gap-4">
+
+          <label className="block text-sm font-bold text-slate-900 mb-3">
+            What do you want to do?
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+
             <button
               type="button"
-              onClick={() => setPostType("offer")}
-              className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-                postType === "offer" 
-                  ? "border-orange-600 bg-orange-50 text-orange-700 shadow-sm" 
-                  : "border-slate-200 hover:border-slate-300 text-slate-600"
+              onClick={() => setType("OFFER")}
+              className={`py-4 rounded-xl border-2 font-bold transition-colors ${
+                type === "OFFER"
+                  ? "border-orange-500 bg-orange-50 text-orange-700"
+                  : "border-slate-200 text-slate-600"
               }`}
             >
-              <Wrench className="h-6 w-6" />
-              <span className="text-sm font-bold">Offer Resources</span>
+              Offer Help
             </button>
+
             <button
               type="button"
-              onClick={() => setPostType("request")}
-              className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-                postType === "request" 
-                  ? "border-red-600 bg-red-50 text-red-700 shadow-sm" 
-                  : "border-slate-200 hover:border-slate-300 text-slate-600"
+              onClick={() => setType("REQUEST")}
+              className={`py-4 rounded-xl border-2 font-bold transition-colors ${
+                type === "REQUEST"
+                  ? "border-red-500 bg-red-50 text-red-700"
+                  : "border-slate-200 text-slate-600"
               }`}
             >
-              <PackageOpen className="h-6 w-6" />
-              <span className="text-sm font-bold">Request Aid</span>
+              Request Help
             </button>
+
           </div>
+
         </div>
+
 
         {/* Title */}
+
         <div>
-          <label className="block text-sm font-bold text-slate-900 mb-2">Title</label>
-          <input 
-            type="text" 
-            placeholder={postType === "offer" ? "e.g., I have 3 cases of bottled water" : "e.g., Need first aid kit"}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-slate-50"
+
+          <label className="block text-sm font-bold text-slate-900 mb-2">
+            Title
+          </label>
+
+          <input
+            required
+            type="text"
+            value={form.title}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                title: e.target.value,
+              }))
+            }
+            placeholder={
+              type === "OFFER"
+                ? "Example: Extra Bottled Water Available"
+                : "Example: Need First Aid Supplies"
+            }
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
+
         </div>
+
+
+        {/* Category */}
+
+        <div>
+
+          <label className="block text-sm font-bold text-slate-900 mb-2">
+            Category
+          </label>
+
+          <select
+            required
+            value={form.category}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                category: e.target.value,
+              }))
+            }
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+
+            <option value="">
+              Select Category
+            </option>
+
+            <option value="Supplies">
+              Supplies
+            </option>
+
+            <option value="Water">
+              Water
+            </option>
+
+            <option value="Food">
+              Food
+            </option>
+
+            <option value="Medical">
+              Medical
+            </option>
+
+            <option value="Tools">
+              Tools
+            </option>
+
+            <option value="Transport">
+              Transport
+            </option>
+
+            <option value="Shelter">
+              Shelter
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+
+          </select>
+
+        </div>
+
 
         {/* Description */}
+
         <div>
-          <label className="block text-sm font-bold text-slate-900 mb-2">Description</label>
-          <textarea 
-            rows={4}
-            placeholder="Provide details about exactly what you have or what you need..."
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-slate-50 resize-none"
+
+          <label className="block text-sm font-bold text-slate-900 mb-2">
+            Description
+          </label>
+
+          <textarea
+            required
+            rows={5}
+            value={form.description}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
+            placeholder="Provide details about the help or resource..."
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
+
         </div>
+
 
         {/* Location */}
+
         <div>
-          <label className="block text-sm font-bold text-slate-900 mb-2">Your Location</label>
+
+          <label className="block text-sm font-bold text-slate-900 mb-2">
+            Location
+          </label>
+
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MapPin className="h-5 w-5 text-slate-400" />
-            </div>
-            <input 
-              type="text" 
-              placeholder="Address or nearby landmark for meetup" 
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-slate-50"
+
+            <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
+
+            <input
+              required
+              type="text"
+              value={form.location}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  location: e.target.value,
+                }))
+              }
+              placeholder="Example: Downtown Shelter"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+
           </div>
-          <p className="text-xs text-slate-500 mt-2">Only share a public meetup spot if your home is unsafe.</p>
+
         </div>
 
-        {/* Submit */}
-        <div className="pt-4 border-t border-slate-100">
-          <button 
-            type="button"
-            className={`w-full text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm ${
-              postType === "offer" ? "bg-orange-600 hover:bg-orange-700" : "bg-red-600 hover:bg-red-700"
-            }`}
-          >
-            <Send className="h-5 w-5" />
-            {postType === "offer" ? "Post Offer to Community" : "Post Request for Aid"}
-          </button>
+
+        {/* Optional Coordinates */}
+
+        <div className="grid grid-cols-2 gap-4">
+
+          <div>
+
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Latitude
+            </label>
+
+            <input
+              type="number"
+              step="any"
+              value={form.latitude}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: e.target.value,
+                }))
+              }
+              placeholder="Optional"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50"
+            />
+
+          </div>
+
+          <div>
+
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Longitude
+            </label>
+
+            <input
+              type="number"
+              step="any"
+              value={form.longitude}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  longitude: e.target.value,
+                }))
+              }
+              placeholder="Optional"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50"
+            />
+
+          </div>
+
         </div>
+
+
+        {/* Submit */}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors ${
+            type === "OFFER"
+              ? "bg-orange-600 hover:bg-orange-700"
+              : "bg-red-600 hover:bg-red-700"
+          }`}
+        >
+
+          <Send className="h-5 w-5" />
+
+          {loading
+            ? "Posting..."
+            : type === "OFFER"
+              ? "Post Offer"
+              : "Post Request"}
+
+        </button>
+
       </form>
+
     </div>
   );
 }
