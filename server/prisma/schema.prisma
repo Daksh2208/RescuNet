@@ -25,6 +25,8 @@ model User {
   verifiedIncidents     Incident[]     @relation("VerifiedBy")
   notifications         Notification[]
   refreshTokens         RefreshToken[]
+  reunificationReports  ReunificationPost[] @relation("ReunificationReportedBy")
+  reunificationFound    ReunificationPost[] @relation("ReunificationFoundBy")
 }
 
 model Incident {
@@ -134,6 +136,28 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model ReunificationPost {
+  id             String               @id @default(uuid())
+  type           ReunificationType
+  name           String
+  description    String?
+  age            String?
+  lastSeen       String
+  latitude       Float?
+  longitude      Float?
+  imageUrl       String?
+  status         ReunificationStatus  @default(MISSING)
+
+  reportedById   String
+  foundById      String?
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  reportedBy     User                 @relation("ReunificationReportedBy", fields: [reportedById], references: [id])
+  foundBy        User?                @relation("ReunificationFoundBy", fields: [foundById], references: [id])
+}
+
 enum UserRole {
   ADMIN
   CITIZEN
@@ -177,4 +201,14 @@ enum ResourceCategory {
   WATER
   MEDICINE
   EQUIPMENT
+}
+
+enum ReunificationType {
+  HUMAN
+  PET
+}
+
+enum ReunificationStatus {
+  MISSING
+  FOUND
 }
