@@ -8,6 +8,7 @@ import uploadRoutes from "./modules/upload/upload.routes.js"
 import reunificationRoutes from "./routes/reunification.routes.js";
 import shelterRoutes from "./routes/shelter.routes.js";
 import communityRoutes from "./routes/community.routes.js";
+import geocodeRoutes from "./routes/geocode.routes.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/reunification", reunificationRoutes);
 app.use("/api/shelters", shelterRoutes);
 app.use("/api/community", communityRoutes);
+app.use("/api/geocode", geocodeRoutes);
 
 app.get("/", (_, res) => {
   res.json({

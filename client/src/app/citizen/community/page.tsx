@@ -322,6 +322,3 @@ export default function CommunityAidPage() {
   );
 }
 
-
-// {/* <PackageOpen className="h-6 w-6" />
-

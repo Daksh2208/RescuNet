@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getIncident, getMyReports, reportIncident } from "./incident.controller.js";
+import { getIncident, getMyReports, getRadarIncidents, reportIncident } from "./incident.controller.js";
 
 import { authenticate } from "../../middleware/auth.middleware.js";
 
@@ -22,6 +22,12 @@ router.get(
   "/my",
   authenticate,
   getMyReports
+);
+
+router.get(
+  "/radar",
+  authenticate,
+  getRadarIncidents
 );
 
 router.get(

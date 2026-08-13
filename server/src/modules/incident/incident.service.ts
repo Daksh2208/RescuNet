@@ -122,3 +122,34 @@ export const getIncidentById = async (
 
 };
 
+export const getRadarIncidents = async () => {
+  return prisma.incident.findMany({
+    where: {
+      status: {
+        in: [
+          "PENDING",
+          "VERIFIED",
+          "ASSIGNED",
+          "IN_PROGRESS",
+        ],
+      },
+    },
+
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      disasterType: true,
+      severity: true,
+      status: true,
+      latitude: true,
+      longitude: true,
+      address: true,
+      createdAt: true,
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};

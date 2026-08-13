@@ -1,6 +1,9 @@
 import type { Response } from "express";
 import type { AuthRequest } from "../../middleware/auth.middleware.js";
 import { createIncident, getIncidentById, getMyIncidents } from "./incident.service.js";
+import {
+  getRadarIncidents as getRadarIncidentsService,
+} from "./incident.service.js";
 
 export const reportIncident = async (
   req: AuthRequest,
@@ -96,4 +99,27 @@ export const getIncident = async (
 
   }
 
+};
+
+export const getRadarIncidents = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const incidents = await getRadarIncidentsService();
+
+    return res.status(200).json({
+      success: true,
+      data: incidents,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch radar incidents",
+    });
+  }
 };

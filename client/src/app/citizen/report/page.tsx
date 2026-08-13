@@ -6,6 +6,7 @@ import Link from "next/link";
 import { reportIncident } from "@/lib/incident";
 import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/upload";
+import { geocodeAddress } from "@/lib/geocode";
 
 export default function ReportEmergencyPage() {
   const [target, setTarget] = useState<"human" | "animal" | "both">("human");
@@ -26,50 +27,6 @@ export default function ReportEmergencyPage() {
 
   const router = useRouter();
 
-  // const handleImageUpload = async (
-
-  //   e: React.ChangeEvent<HTMLInputElement>
-
-  // ) => {
-
-  //   if (!e.target.files?.length) return;
-
-  //   try {
-
-  //     const url = await uploadImage(
-
-  //       e.target.files[0]
-
-  //     );
-
-  //     // setForm(prev => ({
-
-  //     //   ...prev,
-
-  //     //   imageUrl: url
-
-  //     // }));
-
-
-  //     setForm(prev => {
-  //       const updated = {
-  //         ...prev,
-  //         imageUrl: url,
-  //       };
-
-  //       console.log("Updated form:", updated);
-
-  //       return updated;
-  //     });
-
-  //   } catch {
-
-  //     alert("Image upload failed");
-
-  //   }
-
-  // };
-
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -81,51 +38,66 @@ export default function ReportEmergencyPage() {
   };
 
 
-  // const handleSubmit = async (
+//   const handleSubmit = async (
+//   e: React.FormEvent
+// ) => {
 
-  //   e: React.FormEvent
+//   e.preventDefault();
 
-  // ) => {
+//   try {
 
-  //   e.preventDefault();
+//     setLoading(true);
 
-  //   try {
+//     let imageUrl = "";
 
-  //     setLoading(true);
+//     if (imageFile) {
 
-  //     console.log("Handle Submit Form:", form);
-  //     console.log("Image URL:", form.imageUrl);
+//       imageUrl = await uploadImage(imageFile);
 
-  //     await reportIncident(form);
+//     }
 
-  //     setForm({
-  //       title: "",
-  //       description: "",
-  //       disasterType: "",
-  //       severity: "MEDIUM",
-  //       latitude: 0,
-  //       longitude: 0,
-  //       address: "",
-  //       imageUrl: "",
-  //     });
+//     await reportIncident({
 
-  //     router.push("/citizen/reports");
+//       ...form,
 
-  //   }
-  //   catch (err) {
+//       imageUrl,
 
-  //     alert(err);
+//     });
 
-  //   }
-  //   finally {
+//     setForm({
 
-  //     setLoading(false);
+//       title: "",
+//       description: "",
+//       disasterType: "",
+//       severity: "MEDIUM",
+//       latitude: 0,
+//       longitude: 0,
+//       address: "",
 
-  //   }
+//     });
 
-  // }
+//     setImageFile(null);
 
-  const handleSubmit = async (
+//     router.push("/citizen/reports");
+
+//   }
+//   catch (err) {
+
+//     console.error(err);
+
+//     alert("Failed to report incident");
+
+//   }
+//   finally {
+
+//     setLoading(false);
+
+//   }
+
+// };
+
+
+const handleSubmit = async (
   e: React.FormEvent
 ) => {
 
@@ -135,24 +107,47 @@ export default function ReportEmergencyPage() {
 
     setLoading(true);
 
+    // 1. Validate address
+    if (!form.address.trim()) {
+      alert("Please enter the incident location");
+      return;
+    }
+
+    // 2. Convert address into latitude & longitude
+    const location = await geocodeAddress(
+      form.address
+    );
+
+    console.log("Geocoded location:", location);
+
+    // 3. Upload image if selected
     let imageUrl = "";
 
     if (imageFile) {
-
       imageUrl = await uploadImage(imageFile);
-
     }
 
-    await reportIncident({
-
+    // 4. Create incident with real coordinates
+    const incidentData = {
       ...form,
-
+      latitude: location.latitude,
+      longitude: location.longitude,
+      address: location.formattedAddress,
       imageUrl,
+    };
 
-    });
+    console.log(
+      "Sending incident:",
+      incidentData
+    );
 
+    // 5. Send to existing incident API
+    await reportIncident(incidentData);
+
+    alert("Incident reported successfully!");
+
+    // 6. Reset form
     setForm({
-
       title: "",
       description: "",
       disasterType: "",
@@ -160,22 +155,22 @@ export default function ReportEmergencyPage() {
       latitude: 0,
       longitude: 0,
       address: "",
-
     });
 
     setImageFile(null);
 
+    // 7. Go to reports
     router.push("/citizen/reports");
 
-  }
-  catch (err) {
+  } catch (err) {
 
     console.error(err);
 
-    alert("Failed to report incident");
+    alert(
+      "Could not find this location. Please enter a more specific address."
+    );
 
-  }
-  finally {
+  } finally {
 
     setLoading(false);
 
