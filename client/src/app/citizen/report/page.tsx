@@ -38,66 +38,7 @@ export default function ReportEmergencyPage() {
   };
 
 
-//   const handleSubmit = async (
-//   e: React.FormEvent
-// ) => {
-
-//   e.preventDefault();
-
-//   try {
-
-//     setLoading(true);
-
-//     let imageUrl = "";
-
-//     if (imageFile) {
-
-//       imageUrl = await uploadImage(imageFile);
-
-//     }
-
-//     await reportIncident({
-
-//       ...form,
-
-//       imageUrl,
-
-//     });
-
-//     setForm({
-
-//       title: "",
-//       description: "",
-//       disasterType: "",
-//       severity: "MEDIUM",
-//       latitude: 0,
-//       longitude: 0,
-//       address: "",
-
-//     });
-
-//     setImageFile(null);
-
-//     router.push("/citizen/reports");
-
-//   }
-//   catch (err) {
-
-//     console.error(err);
-
-//     alert("Failed to report incident");
-
-//   }
-//   finally {
-
-//     setLoading(false);
-
-//   }
-
-// };
-
-
-const handleSubmit = async (
+  const handleSubmit = async (
   e: React.FormEvent
 ) => {
 
@@ -107,47 +48,24 @@ const handleSubmit = async (
 
     setLoading(true);
 
-    // 1. Validate address
-    if (!form.address.trim()) {
-      alert("Please enter the incident location");
-      return;
-    }
-
-    // 2. Convert address into latitude & longitude
-    const location = await geocodeAddress(
-      form.address
-    );
-
-    console.log("Geocoded location:", location);
-
-    // 3. Upload image if selected
     let imageUrl = "";
 
     if (imageFile) {
+
       imageUrl = await uploadImage(imageFile);
+
     }
 
-    // 4. Create incident with real coordinates
-    const incidentData = {
+    await reportIncident({
+
       ...form,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      address: location.formattedAddress,
+
       imageUrl,
-    };
 
-    console.log(
-      "Sending incident:",
-      incidentData
-    );
+    });
 
-    // 5. Send to existing incident API
-    await reportIncident(incidentData);
-
-    alert("Incident reported successfully!");
-
-    // 6. Reset form
     setForm({
+
       title: "",
       description: "",
       disasterType: "",
@@ -155,28 +73,110 @@ const handleSubmit = async (
       latitude: 0,
       longitude: 0,
       address: "",
+
     });
 
     setImageFile(null);
 
-    // 7. Go to reports
     router.push("/citizen/reports");
 
-  } catch (err) {
+  }
+  catch (err) {
 
     console.error(err);
 
-    alert(
-      "Could not find this location. Please enter a more specific address."
-    );
+    alert("Failed to report incident");
 
-  } finally {
+  }
+  finally {
 
     setLoading(false);
 
   }
 
 };
+
+
+// const handleSubmit = async (
+//   e: React.FormEvent
+// ) => {
+
+//   e.preventDefault();
+
+//   try {
+
+//     setLoading(true);
+
+//     // 1. Validate address
+//     if (!form.address.trim()) {
+//       alert("Please enter the incident location");
+//       return;
+//     }
+
+//     // 2. Convert address into latitude & longitude
+//     const location = await geocodeAddress(
+//       form.address
+//     );
+
+//     console.log("Geocoded location:", location);
+
+//     // 3. Upload image if selected
+//     let imageUrl = "";
+
+//     if (imageFile) {
+//       imageUrl = await uploadImage(imageFile);
+//     }
+
+//     // 4. Create incident with real coordinates
+//     const incidentData = {
+//       ...form,
+//       latitude: location.latitude,
+//       longitude: location.longitude,
+//       address: location.formattedAddress,
+//       imageUrl,
+//     };
+
+//     console.log(
+//       "Sending incident:",
+//       incidentData
+//     );
+
+//     // 5. Send to existing incident API
+//     await reportIncident(incidentData);
+
+//     alert("Incident reported successfully!");
+
+//     // 6. Reset form
+//     setForm({
+//       title: "",
+//       description: "",
+//       disasterType: "",
+//       severity: "MEDIUM",
+//       latitude: 0,
+//       longitude: 0,
+//       address: "",
+//     });
+
+//     setImageFile(null);
+
+//     // 7. Go to reports
+//     router.push("/citizen/reports");
+
+//   } catch (err) {
+
+//     console.error(err);
+
+//     alert(
+//       "Could not find this location. Please enter a more specific address."
+//     );
+
+//   } finally {
+
+//     setLoading(false);
+
+//   }
+
+// };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
