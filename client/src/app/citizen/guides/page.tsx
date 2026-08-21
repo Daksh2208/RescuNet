@@ -10,18 +10,18 @@ export default function SafetyGuidesPage() {
   const guides = [
     {
       title: "Flood & Water Logging Protocol",
-      description: "WHO/NIDM certified guidelines for evacuation, electrical safety, and disease prevention.",
+      description: "Guidelines based on official NIDM, NDMA and WHO safety recommendations",
       content: (
         <>
           <p><strong>Pre-Flood Preparation (NIDM):</strong></p>
           <p>• Know your local relief centers and evacuation routes.</p>
           <p>• Keep a 72-hour emergency kit ready, placed above ground level.</p>
-          <br/>
+          <br />
           <p><strong>During a Flood:</strong></p>
           <p>• Disconnect all electrical appliances to prevent electrocution.</p>
           <p>• Never walk or drive through floodwaters. Just 6 inches of moving water can knock an adult down, and 2 feet can sweep away a vehicle.</p>
           <p>• Move to higher ground immediately; do not wait for instructions if water is rising rapidly.</p>
-          <br/>
+          <br />
           <p><strong>Health & Sanitation (WHO):</strong></p>
           <p>• Drink only boiled or bottled water to prevent water-borne diseases like cholera and typhoid.</p>
           <p>• Wash hands frequently with soap and clean water.</p>
@@ -43,7 +43,7 @@ export default function SafetyGuidesPage() {
           <p>• <strong>COVER</strong> your head and neck (and your entire body if possible) underneath a sturdy table or desk.</p>
           <p>• <strong>HOLD ON</strong> to your shelter until the shaking stops.</p>
           <p>• If outdoors, move to a clear area away from buildings, trees, streetlights, and power lines.</p>
-          <br/>
+          <br />
           <p><strong>After the Earthquake:</strong></p>
           <p>• Expect aftershocks. Each time you feel one, Drop, Cover, and Hold On.</p>
           <p>• Do not light matches or turn on electrical switches, as gas leaks are highly probable.</p>
@@ -64,7 +64,7 @@ export default function SafetyGuidesPage() {
           <p>• Crawl low under the smoke to your exit; heavy smoke and poisonous gases collect first along the ceiling.</p>
           <p>• Before opening a door, feel the doorknob and the cracks around the door. If it is hot, leave the door closed and use your secondary exit.</p>
           <p>• Once outside, go immediately to your designated family meeting place. Never re-enter a burning building.</p>
-          <br/>
+          <br />
           <p><strong>Health & First Aid (WHO):</strong></p>
           <p>• If someone suffers from smoke inhalation, move them to fresh air immediately and seek emergency medical assistance.</p>
           <p>• Cover your nose and mouth with a wet cloth to filter out some smoke particles.</p>
@@ -84,11 +84,11 @@ export default function SafetyGuidesPage() {
           <p><strong>Preparation Phase (NIDM):</strong></p>
           <p>• Secure all loose outdoor items (furniture, tools, garbage cans) that could become lethal projectiles in high winds.</p>
           <p>• Tape, board up, or close storm shutters on all windows to prevent shattered glass from blowing indoors.</p>
-          <br/>
+          <br />
           <p><strong>During the Cyclone:</strong></p>
           <p>• Retreat to a safe indoor room (preferably windowless, on the lowest floor) with your 72-hour survival kit.</p>
           <p>• Do NOT leave the safe room when the 'eye' of the cyclone passes over. The calm is deceptive, and winds will violently return from the opposite direction.</p>
-          <br/>
+          <br />
           <p><strong>Health & Safety (WHO):</strong></p>
           <p>• Stay clear of fallen power lines and report them immediately.</p>
           <p>• For Pets: Bring all animals indoors well before the storm hits. Keep them in carriers to prevent them from hiding in inaccessible spaces out of fear.</p>
@@ -108,7 +108,7 @@ export default function SafetyGuidesPage() {
           <h1 className="text-2xl font-bold text-slate-900">Multi-Disaster Safety Guides</h1>
           <p className="text-slate-500 text-sm mt-1">Life-saving protocols for you and your animals</p>
         </div>
-        <Link 
+        <Link
           href="/citizen"
           className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
         >
@@ -125,16 +125,23 @@ export default function SafetyGuidesPage() {
           <p className="text-sm text-teal-800 mb-4">
             A well-prepared 72-hour kit is the most important step in disaster survival. Ensure you have supplies for all family members, including pets.
           </p>
-          <button className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors">
+          {/* <button className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors">
             Download PDF Checklist
-          </button>
+          </button> */}
+          <a
+            href="/emergency-kit-checklist.pdf"
+            download
+            className="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors"
+          >
+            Download PDF Checklist
+          </a>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {guides.map((guide, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             onClick={() => setExpandedGuide(expandedGuide === i ? null : i)}
             className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col"
           >
@@ -150,7 +157,7 @@ export default function SafetyGuidesPage() {
             <p className="text-sm text-slate-600 mb-4 leading-relaxed">
               {guide.description}
             </p>
-            
+
             {expandedGuide === i ? (
               <div className="mt-2 pt-4 border-t border-slate-100 text-sm text-slate-800 space-y-2 whitespace-pre-line animate-fade-in-up">
                 {guide.content}
