@@ -1,9 +1,40 @@
 "use client";
 
 import { User, Phone, Mail, MapPin, Bell, Shield, LogOut, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/user/me");
+        setUserData(res.data.user);
+      } catch (err) {
+        console.error("Failed to load profile", err);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("userRole");
+    router.push("/login");
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-slate-500 font-medium">Loading profile...</div>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -11,7 +42,10 @@ export default function ProfilePage() {
           <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
           <p className="text-slate-500 text-sm mt-1">Manage your account and preferences</p>
         </div>
-        <button className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+        <button 
+          onClick={handleLogout}
+          className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+        >
           <LogOut className="h-4 w-4" /> Sign Out
         </button>
       </div>
@@ -24,7 +58,7 @@ export default function ProfilePage() {
             <div className="h-24 w-24 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-4">
               <User className="h-12 w-12" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Citizen User</h2>
+            <h2 className="text-xl font-bold text-slate-900">{userData?.name || "Citizen User"}</h2>
             <div className="flex items-center gap-1 mt-1 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-semibold">
               <CheckCircle2 className="h-3.5 w-3.5" /> Account Verified
             </div>
@@ -35,25 +69,25 @@ export default function ProfilePage() {
             
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Phone</p>
-                <p className="text-sm font-medium text-slate-900">+1 (555) 019-2023</p>
+                <p className="text-sm font-medium text-slate-900 truncate">{userData?.phone || "Not provided"}</p>
               </div>
             </div>
             
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Email</p>
-                <p className="text-sm font-medium text-slate-900">citizen@example.com</p>
+                <p className="text-sm font-medium text-slate-900 truncate">{userData?.email || "citizen@example.com"}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-slate-400 mt-0.5" />
               <div>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Default Location</p>
-                <p className="text-sm font-medium text-slate-900">123 Safe Haven Rd, Sector 4</p>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Role</p>
+                <p className="text-sm font-medium text-slate-900">{userData?.role || "CITIZEN"}</p>
               </div>
             </div>
           </div>
@@ -90,18 +124,6 @@ export default function ProfilePage() {
                   <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                 </label>
               </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Push Notifications</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Receive in-app alerts for evacuation routes and safety updates.</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" value="" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-
             </div>
           </div>
 
@@ -121,7 +143,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -12,7 +12,8 @@ import {
   Menu, 
   X, 
   ShieldAlert,
-  Bell
+  Bell,
+  BookOpen
 } from "lucide-react";
 
 export default function VolunteerLayout({
@@ -28,6 +29,7 @@ export default function VolunteerLayout({
     { name: "Relief Tasks", href: "/volunteer/tasks", icon: HeartHandshake },
     { name: "Shelter Map", href: "/volunteer/shelters", icon: Map },
     { name: "Foster Coordination", href: "/volunteer/foster", icon: PawPrint },
+    { name: "Protocols & Guides", href: "/volunteer/guides", icon: BookOpen },
     { name: "Profile", href: "/volunteer/profile", icon: User },
   ];
 
@@ -94,10 +96,10 @@ export default function VolunteerLayout({
           </Link>
           
           <div className="flex items-center gap-4">
-            <button className="text-slate-600 relative">
+            <Link href="/volunteer/notifications" className="text-slate-600 relative">
               <Bell className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-green-600 rounded-full border border-white"></span>
-            </button>
+            </Link>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-slate-600"
@@ -141,10 +143,10 @@ export default function VolunteerLayout({
             {navigation.find(n => n.href === pathname)?.name || "Dashboard"}
           </h1>
           <div className="flex items-center gap-6">
-            <button className="text-slate-400 hover:text-slate-600 relative transition-colors">
+            <Link href="/volunteer/notifications" className="text-slate-400 hover:text-slate-600 relative transition-colors">
               <Bell className="h-6 w-6" />
               <span className="absolute top-0 right-0.5 h-2.5 w-2.5 bg-green-600 rounded-full border-2 border-white"></span>
-            </button>
+            </Link>
           </div>
         </header>
 
