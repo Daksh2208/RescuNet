@@ -9,4 +9,5 @@ export interface CreateShelterDto {
   capacity: number;
   occupied?: number;
   contactNumber: string;
+  needs?: string[];
 }

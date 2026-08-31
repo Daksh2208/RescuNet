@@ -28,6 +28,9 @@ model User {
   reunificationReports  ReunificationPost[] @relation("ReunificationReportedBy")
   reunificationFound    ReunificationPost[] @relation("ReunificationFoundBy")
   communityPosts        CommunityPost[]
+  claimedTasks          VolunteerTask[]     @relation("TaskClaimedBy")
+  fosterRequests        FosterRequest[]     @relation("FosterVolunteer")
+  createdFosterReqs     FosterRequest[]     @relation("FosterCreatedBy")
 }
 
 model Incident {
@@ -82,10 +85,12 @@ model Shelter {
   latitude      Float
   longitude     Float
   capacity      Int
-  occupied      Int          @default(0)
+  occupied      Int             @default(0)
   contactNumber String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  needs         String[]        @default([])
+  fosterRequests FosterRequest[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model Resource {
@@ -242,3 +247,67 @@ enum CommunityPostType {
   OFFER
   REQUEST
 }
+
+model VolunteerTask {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  type        VolunteerTaskType @default(SUPPLY_DELIVERY)
+  priority    Severity          @default(MEDIUM)
+  status      TaskStatus        @default(AVAILABLE)
+  location    String
+  latitude    Float?
+  longitude   Float?
+  claimedById String?
+  claimedBy   User?             @relation("TaskClaimedBy", fields: [claimedById], references: [id])
+  claimedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model FosterRequest {
+  id                String        @id @default(uuid())
+  petName           String
+  animalType        AnimalType    @default(DOG)
+  breed             String?
+  description       String
+  location          String
+  shelterId         String?
+  shelter           Shelter?      @relation(fields: [shelterId], references: [id])
+  status            FosterStatus  @default(OPEN)
+  createdById       String
+  createdBy         User          @relation("FosterCreatedBy", fields: [createdById], references: [id])
+  fosterVolunteerId String?
+  fosterVolunteer   User?         @relation("FosterVolunteer", fields: [fosterVolunteerId], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+enum VolunteerTaskType {
+  SUPPLY_DELIVERY
+  DEBRIS_CLEARING
+  MEDICAL_TRANSPORT
+  ANIMAL_FOSTER
+  OTHER
+}
+
+enum TaskStatus {
+  AVAILABLE
+  CLAIMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AnimalType {
+  DOG
+  CAT
+  OTHER
+}
+
+enum FosterStatus {
+  OPEN
+  FOSTERED
+  CANCELLED
+}

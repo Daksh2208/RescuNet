@@ -2,7 +2,6 @@
 
 import { 
   HeartHandshake, 
-  MapPin, 
   ArrowRight,
   PawPrint,
   CheckCircle2,
@@ -10,30 +9,58 @@ import {
   Home
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
+
+interface TaskItem {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  status: string;
+  location: string;
+}
 
 export default function VolunteerDashboard() {
-  const openTasks = [
-    {
-      id: "TSK-102",
-      type: "Supply Delivery",
-      desc: "Transport 50 Blankets to Flood Shelter B",
-      priority: "HIGH",
-      icon: Package,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-      border: "border-blue-200"
-    },
-    {
-      id: "TSK-103",
-      type: "Animal Foster Needed",
-      desc: "Temporary housing for 3 rescue dogs (Earthquake victims)",
-      priority: "CRITICAL",
-      icon: PawPrint,
-      color: "text-orange-600",
-      bg: "bg-orange-50",
-      border: "border-orange-200"
+  const [openTasks, setOpenTasks] = useState<TaskItem[]>([]);
+  const [myTasksCount, setMyTasksCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [availRes, myRes] = await Promise.all([
+        api.get("/tasks"),
+        api.get("/tasks/my"),
+      ]);
+      setOpenTasks(availRes.data.tasks || []);
+      setMyTasksCount((myRes.data.tasks || []).length);
+    } catch (err: any) {
+      console.error("Failed to load volunteer dashboard data", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const handleClaimTask = async (taskId: string) => {
+    setClaimingId(taskId);
+    try {
+      await api.post(`/tasks/${taskId}/claim`);
+      toast.success("Task claimed successfully!");
+      fetchDashboardData();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to claim task");
+    } finally {
+      setClaimingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -58,7 +85,10 @@ export default function VolunteerDashboard() {
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="group bg-green-600 rounded-2xl p-6 text-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+        <Link 
+          href="/volunteer/tasks"
+          className="group bg-green-600 rounded-2xl p-6 text-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[160px] relative overflow-hidden"
+        >
           <div className="absolute -right-4 -top-4 opacity-20 group-hover:scale-110 transition-transform duration-500">
             <HeartHandshake className="w-32 h-32" />
           </div>
@@ -67,9 +97,9 @@ export default function VolunteerDashboard() {
               <CheckCircle2 className="h-6 w-6 text-white" />
             </div>
             <h2 className="text-xl font-bold mb-1 leading-tight">My Active Tasks</h2>
-            <p className="text-green-100 text-sm mt-2">You have 0 tasks in progress</p>
+            <p className="text-green-100 text-sm mt-2">You have {myTasksCount} tasks in progress</p>
           </div>
-        </div>
+        </Link>
 
         <Link 
           href="/volunteer/shelters"
@@ -113,41 +143,50 @@ export default function VolunteerDashboard() {
           </span>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {openTasks.map((task) => (
-              <div key={task.id} className={`p-5 rounded-xl border ${task.border} ${task.bg} flex flex-col gap-4`}>
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm ${task.color}`}>
-                      <task.icon className="h-5 w-5" />
+          {loading ? (
+            <div className="text-center py-8 text-slate-500 font-medium">Loading open tasks...</div>
+          ) : openTasks.length === 0 ? (
+            <div className="text-center py-8 text-slate-500 font-medium">
+              No open tasks available right now. Check back later!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {openTasks.slice(0, 4).map((task) => (
+                <div key={task.id} className="p-5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col gap-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm text-green-600">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900">{task.title}</h3>
+                        <p className="text-xs font-medium text-slate-500">{task.type}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900">{task.type}</h3>
-                      <p className="text-xs font-medium text-slate-500">{task.id}</p>
-                    </div>
+                    <span className="text-xs font-bold px-2 py-1 bg-white rounded-md border border-slate-200 text-slate-700">
+                      {task.priority}
+                    </span>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 bg-white rounded-md border ${task.border} ${task.color}`}>
-                    {task.priority}
-                  </span>
-                </div>
-                
-                <div className="space-y-2">
-                  <p className="text-sm text-slate-700 font-medium">
-                    {task.desc}
-                  </p>
-                </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm text-slate-700 font-medium">
+                      {task.description}
+                    </p>
+                  </div>
 
-                <div className="pt-4 border-t border-slate-200/50 flex gap-3 mt-auto">
-                  <button className="flex-1 bg-white border border-slate-200 text-slate-700 font-medium py-2 rounded-lg text-sm hover:bg-slate-50 transition-colors">
-                    View Details
-                  </button>
-                  <button className="flex-1 bg-green-600 text-white font-medium py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
-                    Claim Task
-                  </button>
+                  <div className="pt-4 border-t border-slate-200/50 flex gap-3 mt-auto">
+                    <button 
+                      onClick={() => handleClaimTask(task.id)}
+                      disabled={claimingId === task.id}
+                      className="w-full bg-green-600 text-white font-medium py-2 rounded-lg text-sm hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      {claimingId === task.id ? "Claiming..." : "Claim Task"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

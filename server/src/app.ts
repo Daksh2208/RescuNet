@@ -9,6 +9,9 @@ import reunificationRoutes from "./routes/reunification.routes.js";
 import shelterRoutes from "./routes/shelter.routes.js";
 import communityRoutes from "./routes/community.routes.js";
 import geocodeRoutes from "./routes/geocode.routes.js";
+import taskRoutes from "./routes/task.routes.js";
+import fosterRoutes from "./routes/foster.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 
 const app = express();
 
@@ -33,6 +36,9 @@ app.use("/api/reunification", reunificationRoutes);
 app.use("/api/shelters", shelterRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/geocode", geocodeRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/foster", fosterRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (_, res) => {
   res.json({

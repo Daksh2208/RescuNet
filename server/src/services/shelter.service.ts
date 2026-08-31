@@ -16,6 +16,7 @@ export const createShelter = async (
       capacity: data.capacity,
       occupied: data.occupied ?? 0,
       contactNumber: data.contactNumber,
+      needs: data.needs || [],
     },
   });
 
