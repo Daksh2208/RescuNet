@@ -7,13 +7,15 @@ export interface CreateFosterDTO {
   breed?: string;
   description: string;
   location: string;
+  isMedicalNeeds?: boolean;
   shelterId?: string;
 }
 
-export const getAllOpenFosterRequests = async () => {
+export const getAllOpenFosterRequests = async (isMedicalNeeds?: boolean) => {
   return await prisma.fosterRequest.findMany({
     where: {
       status: FosterStatus.OPEN,
+      ...(isMedicalNeeds !== undefined ? { isMedicalNeeds } : {}),
     },
     orderBy: {
       createdAt: "desc",
@@ -45,6 +47,7 @@ export const createFosterRequest = async (data: CreateFosterDTO, createdById: st
       breed: data.breed,
       description: data.description,
       location: data.location,
+      isMedicalNeeds: data.isMedicalNeeds ?? false,
       shelterId: data.shelterId,
       createdById,
     },

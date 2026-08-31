@@ -6,9 +6,10 @@ import {
   applyToFoster,
 } from "../services/foster.service.js";
 
-export const getFosterRequests = async (_: AuthRequest, res: Response) => {
+export const getFosterRequests = async (req: AuthRequest, res: Response) => {
   try {
-    const requests = await getAllOpenFosterRequests();
+    const medicalNeeds = req.query.medicalNeeds === "true" ? true : req.query.medicalNeeds === "false" ? false : undefined;
+    const requests = await getAllOpenFosterRequests(medicalNeeds);
     return res.status(200).json({
       success: true,
       requests,

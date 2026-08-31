@@ -273,6 +273,7 @@ model FosterRequest {
   breed             String?
   description       String
   location          String
+  isMedicalNeeds    Boolean       @default(false)
   shelterId         String?
   shelter           Shelter?      @relation(fields: [shelterId], references: [id])
   status            FosterStatus  @default(OPEN)
