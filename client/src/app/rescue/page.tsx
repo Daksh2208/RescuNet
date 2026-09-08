@@ -67,7 +67,10 @@ export default function RescueDashboard() {
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="group bg-blue-600 rounded-2xl p-6 text-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+        <Link 
+          href="/rescue/comms"
+          className="group bg-blue-600 rounded-2xl p-6 text-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[160px] relative overflow-hidden"
+        >
           <div className="absolute -right-4 -top-4 opacity-20 group-hover:scale-110 transition-transform duration-500">
             <Truck className="w-32 h-32" />
           </div>
@@ -78,7 +81,7 @@ export default function RescueDashboard() {
             <h2 className="text-xl font-bold mb-1 leading-tight">Update Status</h2>
             <p className="text-blue-100 text-sm mt-2">Broadcast location to Command</p>
           </div>
-        </div>
+        </Link>
 
         <Link 
           href="/rescue/map"

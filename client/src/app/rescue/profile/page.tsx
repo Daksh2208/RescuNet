@@ -1,16 +1,50 @@
 "use client";
 
 import { User, Phone, Mail, MapPin, Bell, Shield, LogOut, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Ready for backend fetch: api.get("/user/me")
+    setTimeout(() => {
+      setUserData({
+        name: "Unit Alpha-1",
+        phone: "+1 (555) 019-2023",
+        role: "RESCUE",
+        base: "HQ Sector 4"
+      });
+      setLoading(false);
+    }, 500);
+  }, []);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userRole");
+      router.push("/login");
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-slate-500 font-medium">Loading unit data...</div>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage your account and preferences</p>
+          <h1 className="text-2xl font-bold text-slate-900">Unit Profile</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage your team settings</p>
         </div>
-        <button className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+        <button 
+          onClick={handleLogout}
+          className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+        >
           <LogOut className="h-4 w-4" /> Sign Out
         </button>
       </div>

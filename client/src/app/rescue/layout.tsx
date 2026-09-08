@@ -12,7 +12,10 @@ import {
   Menu, 
   X, 
   ShieldAlert,
-  Bell
+  Bell,
+  Users,
+  Wrench,
+  ClipboardType
 } from "lucide-react";
 
 export default function RescueLayout({
@@ -26,8 +29,11 @@ export default function RescueLayout({
   const navigation = [
     { name: "Dashboard", href: "/rescue", icon: LayoutDashboard },
     { name: "Active Missions", href: "/rescue/missions", icon: Truck },
+    { name: "Volunteer Dispatch", href: "/rescue/dispatcher", icon: Users },
+    { name: "Fleet & Equipment", href: "/rescue/fleet", icon: Wrench },
     { name: "Dispatch Map", href: "/rescue/map", icon: Map },
     { name: "Team Comms", href: "/rescue/comms", icon: MessageSquare },
+    { name: "Action Reports", href: "/rescue/reports", icon: ClipboardType },
     { name: "Profile", href: "/rescue/profile", icon: User },
   ];
 
@@ -94,10 +100,10 @@ export default function RescueLayout({
           </Link>
           
           <div className="flex items-center gap-4">
-            <button className="text-slate-600 relative">
+            <Link href="/rescue/notifications" className="text-slate-600 relative">
               <Bell className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-blue-600 rounded-full border border-white"></span>
-            </button>
+            </Link>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-slate-600"
@@ -141,10 +147,10 @@ export default function RescueLayout({
             {navigation.find(n => n.href === pathname)?.name || "Dashboard"}
           </h1>
           <div className="flex items-center gap-6">
-            <button className="text-slate-400 hover:text-slate-600 relative transition-colors">
+            <Link href="/rescue/notifications" className="text-slate-400 hover:text-slate-600 relative transition-colors">
               <Bell className="h-6 w-6" />
               <span className="absolute top-0 right-0.5 h-2.5 w-2.5 bg-blue-600 rounded-full border-2 border-white"></span>
-            </button>
+            </Link>
           </div>
         </header>
 
