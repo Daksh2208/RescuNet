@@ -73,19 +73,17 @@ export default function NotificationsPage() {
           <p className="text-slate-500 text-sm mt-1">Stay updated on disaster alerts and community requests</p>
         </div>
         <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
-          <button 
+          <button
             onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-              filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
           >
             All
           </button>
-          <button 
+          <button
             onClick={() => setFilter("unread")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${
-              filter === "unread" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${filter === "unread" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
           >
             Unread
             <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -104,16 +102,15 @@ export default function NotificationsPage() {
           </div>
         ) : (
           displayNotifications.map((notification) => (
-            <div 
-              key={notification.id} 
-              className={`bg-white rounded-2xl p-5 border shadow-sm transition-all flex flex-col md:flex-row gap-5 relative overflow-hidden ${
-                notification.unread ? 'border-slate-300' : 'border-slate-100 opacity-75'
-              }`}
+            <div
+              key={notification.id}
+              className={`bg-white rounded-2xl p-5 border shadow-sm transition-all flex flex-col md:flex-row gap-5 relative overflow-hidden ${notification.unread ? 'border-slate-300' : 'border-slate-100 opacity-75'
+                }`}
             >
               {notification.unread && (
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
               )}
-              
+
               <div className="flex items-start gap-4 flex-1">
                 <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border ${notification.border} ${notification.bg} ${notification.color}`}>
                   <notification.icon className="h-6 w-6" />
@@ -130,16 +127,15 @@ export default function NotificationsPage() {
                   <p className={`text-sm leading-relaxed ${notification.unread ? 'text-slate-700' : 'text-slate-500'}`}>
                     {notification.message}
                   </p>
-                  
+
                   {notification.action && (
                     <div className="mt-4">
-                      <button className={`text-sm font-bold px-4 py-2 rounded-lg border transition-colors ${
-                        notification.type === 'alert' 
-                          ? 'border-red-200 text-red-700 hover:bg-red-50' 
+                      <button className={`text-sm font-bold px-4 py-2 rounded-lg border transition-colors ${notification.type === 'alert'
+                          ? 'border-red-200 text-red-700 hover:bg-red-50'
                           : notification.type === 'reunification'
-                          ? 'border-purple-200 text-purple-700 hover:bg-purple-50'
-                          : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                      }`}>
+                            ? 'border-purple-200 text-purple-700 hover:bg-purple-50'
+                            : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}>
                         {notification.action}
                       </button>
                     </div>

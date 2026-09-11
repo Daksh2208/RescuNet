@@ -349,11 +349,18 @@ export default function HazardRadarPage() {
             <GoogleMap
               center={mapCenter}
               zoom={mapZoom}
+              onCameraChanged={(ev) => {
+                setMapCenter(ev.detail.center);
+                setMapZoom(ev.detail.zoom);
+              }}
               gestureHandling="greedy"
               disableDefaultUI={false}
+              zoomControl={true}
               mapTypeControl={true}
               streetViewControl={false}
               fullscreenControl={true}
+              minZoom={3}
+              maxZoom={20}
               style={{
                 width: "100%",
                 height: "100%",

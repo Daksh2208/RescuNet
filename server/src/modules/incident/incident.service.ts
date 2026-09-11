@@ -6,7 +6,7 @@ export const createIncident = async (
   userId: string
 ) => {
 
-    console.log("Service data:", data);
+  console.log("Service data:", data);
 
 
   const incident = await prisma.incident.create({
@@ -37,18 +37,18 @@ export const createIncident = async (
 
     await prisma.incidentImage.create({
 
-        data:{
+      data: {
 
-            incidentId:incident.id,
-            imageUrl:data.imageUrl
+        incidentId: incident.id,
+        imageUrl: data.imageUrl
 
-        }
+      }
 
     });
 
-}
+  }
 
-return incident;
+  return incident;
 
 };
 

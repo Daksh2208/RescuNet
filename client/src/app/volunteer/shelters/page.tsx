@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, MapPin, Navigation2, CheckCircle2, Navigation, Phone, Locate } from "lucide-react";
+import { Home, MapPin, CheckCircle2, Navigation, Phone, Locate, ZoomIn, ZoomOut, Compass } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -77,13 +77,29 @@ export default function VolunteerSheltersPage() {
         };
         setUserLocation(loc);
         setMapCenter(loc);
-        setMapZoom(14);
+        setMapZoom(15);
         toast.success("Located your position!");
       },
       () => {
         toast.error("Unable to retrieve location permission");
       }
     );
+  };
+
+  const handleZoomIn = () => {
+    setMapZoom((prev) => Math.min(prev + 1, 20));
+  };
+
+  const handleZoomOut = () => {
+    setMapZoom((prev) => Math.max(prev - 1, 3));
+  };
+
+  const handleFocusShelter = (shelter: ShelterItem) => {
+    setSelectedShelter(shelter);
+    if (shelter.latitude && shelter.longitude) {
+      setMapCenter({ lat: shelter.latitude, lng: shelter.longitude });
+      setMapZoom(16);
+    }
   };
 
   const getShelterStatus = (occupied: number, capacity: number) => {
@@ -110,7 +126,7 @@ export default function VolunteerSheltersPage() {
               <Home className="h-6 w-6 text-green-600" />
               Shelter Needs & Map Navigation
             </h1>
-            <p className="text-slate-500 text-sm mt-1">Locate nearby shelters, check supply needs, and get live turn-by-turn navigation</p>
+            <p className="text-slate-500 text-sm mt-1">Locate nearby shelters, zoom in to explore exact areas, check supply needs, and navigate</p>
           </div>
           <Link 
             href="/volunteer"
@@ -122,26 +138,66 @@ export default function VolunteerSheltersPage() {
 
         <div className="flex flex-col lg:flex-row gap-6 min-h-[550px]">
           {/* Left Col: Interactive Google Map */}
-          <div className="lg:w-2/3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-[450px]">
+          <div className="lg:w-2/3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-[480px]">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-10 relative">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Navigation className="h-4 w-4 text-green-600" /> Live Shelter Navigation Map
               </h2>
-              <button 
-                onClick={handleMyLocation}
-                className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors"
-                title="Center on my location"
-              >
-                <Locate className="h-4 w-4" /> My Location
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                  Zoom Level: {mapZoom}
+                </span>
+                <button 
+                  onClick={handleMyLocation}
+                  className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors"
+                  title="Center & Zoom on my location"
+                >
+                  <Locate className="h-4 w-4" /> My Location
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 relative w-full h-full min-h-[400px]">
+            <div className="flex-1 relative w-full h-full min-h-[420px]">
+              {/* Floating Zoom & Camera Controls Overlay */}
+              <div className="absolute top-4 right-4 z-20 flex flex-col gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-slate-200">
+                <button
+                  onClick={handleZoomIn}
+                  className="p-2 hover:bg-slate-100 text-slate-700 rounded-lg font-bold transition-colors flex items-center justify-center"
+                  title="Zoom In (+)"
+                >
+                  <ZoomIn className="h-5 w-5 text-slate-800" />
+                </button>
+                <button
+                  onClick={handleZoomOut}
+                  className="p-2 hover:bg-slate-100 text-slate-700 rounded-lg font-bold transition-colors flex items-center justify-center"
+                  title="Zoom Out (-)"
+                >
+                  <ZoomOut className="h-5 w-5 text-slate-800" />
+                </button>
+                <div className="h-px bg-slate-200 my-0.5" />
+                <button
+                  onClick={handleMyLocation}
+                  className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center justify-center"
+                  title="Center & Zoom on My Location"
+                >
+                  <Locate className="h-5 w-5" />
+                </button>
+              </div>
+
               <GoogleMap
                 center={mapCenter}
                 zoom={mapZoom}
+                onCameraChanged={(ev) => {
+                  setMapCenter(ev.detail.center);
+                  setMapZoom(ev.detail.zoom);
+                }}
                 gestureHandling="greedy"
-                disableDefaultUI={false}
+                zoomControl={true}
+                mapTypeControl={true}
+                streetViewControl={false}
+                fullscreenControl={true}
+                minZoom={3}
+                maxZoom={20}
                 style={{ width: "100%", height: "100%" }}
               >
                 {shelters.map((shelter) => (
@@ -150,7 +206,7 @@ export default function VolunteerSheltersPage() {
                       key={shelter.id}
                       position={{ lat: shelter.latitude, lng: shelter.longitude }}
                       title={shelter.name}
-                      onClick={() => setSelectedShelter(shelter)}
+                      onClick={() => handleFocusShelter(shelter)}
                     />
                   ) : null
                 ))}
@@ -164,20 +220,28 @@ export default function VolunteerSheltersPage() {
                     position={{ lat: selectedShelter.latitude, lng: selectedShelter.longitude }}
                     onCloseClick={() => setSelectedShelter(null)}
                   >
-                    <div className="p-2 min-w-[200px]">
+                    <div className="p-2 min-w-[220px]">
                       <h3 className="font-bold text-sm text-slate-900 mb-1">{selectedShelter.name}</h3>
                       <p className="text-xs text-slate-600 mb-2">{selectedShelter.address}</p>
                       <p className="text-xs font-semibold text-slate-700 mb-3">
                         Capacity: {selectedShelter.occupied} / {selectedShelter.capacity}
                       </p>
-                      <a
-                        href={getDirectionsUrl(selectedShelter.latitude, selectedShelter.longitude, selectedShelter.address)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 w-full bg-green-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-green-700"
-                      >
-                        <Navigation className="h-3.5 w-3.5" /> Navigate in Google Maps
-                      </a>
+                      <div className="flex flex-col gap-1.5">
+                        <button
+                          onClick={() => handleFocusShelter(selectedShelter)}
+                          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg border border-blue-200 flex items-center justify-center gap-1.5"
+                        >
+                          <ZoomIn className="h-3.5 w-3.5" /> Zoom In to Area
+                        </button>
+                        <a
+                          href={getDirectionsUrl(selectedShelter.latitude, selectedShelter.longitude, selectedShelter.address)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full bg-green-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-green-700 flex items-center justify-center gap-1.5"
+                        >
+                          <Navigation className="h-3.5 w-3.5" /> Navigate in Google Maps
+                        </a>
+                      </div>
                     </div>
                   </InfoWindow>
                 )}
@@ -214,11 +278,14 @@ export default function VolunteerSheltersPage() {
               ) : (
                 shelters.map((shelter) => {
                   const status = getShelterStatus(shelter.occupied, shelter.capacity);
+                  const isSelected = selectedShelter?.id === shelter.id;
 
                   return (
                     <div 
                       key={shelter.id} 
-                      className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between"
+                      className={`bg-white rounded-2xl border p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between ${
+                        isSelected ? "border-blue-500 ring-2 ring-blue-100" : "border-slate-200"
+                      }`}
                     >
                       <div className="flex items-start justify-between mb-3 pl-2">
                         <div>
@@ -260,10 +327,17 @@ export default function VolunteerSheltersPage() {
                         </div>
                       )}
 
-                      <div className="pl-2 grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
+                      <div className="pl-2 grid grid-cols-3 gap-2 pt-3 border-t border-slate-100">
+                        <button 
+                          onClick={() => handleFocusShelter(shelter)}
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2 rounded-xl text-xs transition-colors border border-blue-200 flex items-center justify-center gap-1"
+                          title="Zoom in on map to see location area"
+                        >
+                          <ZoomIn className="h-3.5 w-3.5" /> Zoom In
+                        </button>
                         <a 
                           href={`tel:${shelter.contactNumber}`}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition-colors border border-slate-200 flex items-center justify-center gap-1.5"
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition-colors border border-slate-200 flex items-center justify-center gap-1"
                         >
                           <Phone className="h-3.5 w-3.5" /> Call
                         </a>
@@ -271,9 +345,9 @@ export default function VolunteerSheltersPage() {
                           href={getDirectionsUrl(shelter.latitude, shelter.longitude, shelter.address)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center gap-1"
                         >
-                          <Navigation className="h-3.5 w-3.5" /> Directions
+                          <Navigation className="h-3.5 w-3.5" /> Direct
                         </a>
                       </div>
                     </div>

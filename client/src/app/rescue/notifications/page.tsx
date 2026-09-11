@@ -63,26 +63,24 @@ export default function RescueNotificationsPage() {
           <p className="text-slate-500 text-sm mt-1">Operational updates and AI alerts for your unit</p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 items-center">
-          <Link 
+          <Link
             href="/rescue"
             className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm"
           >
             Back to Dashboard
           </Link>
           <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
-            <button 
+            <button
               onClick={() => setFilter("all")}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}
             >
               All
             </button>
-            <button 
+            <button
               onClick={() => setFilter("unread")}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${
-                filter === "unread" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${filter === "unread" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}
             >
               Unread
               <span className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -97,8 +95,8 @@ export default function RescueNotificationsPage() {
         {displayNotifications.length > 0 ? (
           <div className="divide-y divide-slate-100">
             {displayNotifications.map((notif) => (
-              <div 
-                key={notif.id} 
+              <div
+                key={notif.id}
                 className={`p-5 hover:bg-slate-50 transition-colors flex gap-4 ${notif.unread ? "bg-blue-50/30" : ""}`}
               >
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 ${notif.bg} ${notif.color}`}>

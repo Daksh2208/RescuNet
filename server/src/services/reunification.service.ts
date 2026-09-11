@@ -41,33 +41,33 @@ export const getReunificationPosts = async (
     where: {
       ...(type
         ? {
-            type,
-          }
+          type,
+        }
         : {}),
 
       ...(search
         ? {
-            OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
               },
-              {
-                lastSeen: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+            },
+            {
+              lastSeen: {
+                contains: search,
+                mode: "insensitive",
               },
-              {
-                description: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+            },
+            {
+              description: {
+                contains: search,
+                mode: "insensitive",
               },
-            ],
-          }
+            },
+          ],
+        }
         : {}),
     },
 
