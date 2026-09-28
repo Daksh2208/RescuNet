@@ -34,11 +34,20 @@ export const registerUser = async (data: RegisterData) => {
   }
 
   // Prevent public creation of privileged accounts
-  const allowedRole =
-    data.role === UserRole.CITIZEN ||
-      data.role === UserRole.VOLUNTEER
-      ? data.role
-      : UserRole.CITIZEN;
+  const allowedRoles = [
+    UserRole.CITIZEN,
+    UserRole.VOLUNTEER,
+    UserRole.RESCUE,
+  ];
+
+  if (
+    data.role !== UserRole.CITIZEN &&
+    data.role !== UserRole.VOLUNTEER &&
+    data.role !== UserRole.RESCUE
+  ) {
+    throw new Error("Invalid registration role");
+  }
+
 
   const hashedPassword = await hashPassword(data.password);
 
@@ -48,7 +57,9 @@ export const registerUser = async (data: RegisterData) => {
       email: data.email,
       phone: data.phone,
       password: hashedPassword,
-      role: allowedRole,
+      role: data.role,
+      isVerified: data.role === UserRole.CITIZEN || data.role === UserRole.VOLUNTEER,
+      isActive: true,
     },
   });
 
@@ -117,36 +128,36 @@ export const loginUser = async (
 
 export const refreshAccessToken = async (refreshToken: string) => {
 
-    if (!refreshToken) {
-        throw new Error("Refresh token missing");
+  if (!refreshToken) {
+    throw new Error("Refresh token missing");
+  }
+
+  const decoded = jwt.verify(
+    refreshToken,
+    env.JWT_REFRESH_SECRET
+  ) as {
+    id: string;
+  };
+
+  const tokenInDb = await prisma.refreshToken.findUnique({
+    where: {
+      token: refreshToken,
+    },
+  });
+
+  if (!tokenInDb) {
+    throw new Error("Invalid refresh token");
+  }
+
+  const accessToken = jwt.sign(
+    {
+      id: decoded.id,
+    },
+    env.JWT_ACCESS_SECRET,
+    {
+      expiresIn: "15m",
     }
+  );
 
-    const decoded = jwt.verify(
-        refreshToken,
-        env.JWT_REFRESH_SECRET
-    ) as {
-        id: string;
-    };
-
-    const tokenInDb = await prisma.refreshToken.findUnique({
-        where: {
-            token: refreshToken,
-        },
-    });
-
-    if (!tokenInDb) {
-        throw new Error("Invalid refresh token");
-    }
-
-    const accessToken = jwt.sign(
-        {
-            id: decoded.id,
-        },
-        env.JWT_ACCESS_SECRET,
-        {
-            expiresIn: "15m",
-        }
-    );
-
-    return accessToken;
+  return accessToken;
 };

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 
 export default function RegisterPage() {
-  const [role, setRole] = useState<"citizen" | "volunteer" | "rescue" | "admin">("citizen");
+  const [role, setRole] = useState<"citizen" | "volunteer" | "rescue">("citizen");
 
   const router = useRouter();
 
@@ -60,7 +60,7 @@ export default function RegisterPage() {
 
     } catch (err: any) {
 
-        console.log(err);
+      console.log(err);
       alert(
         err.response?.data?.message ||
         "Registration failed"
@@ -142,17 +142,6 @@ export default function RegisterPage() {
                 <span className="text-sm font-semibold">Rescue</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "admin"
-                  ? "border-purple-600 bg-purple-50 text-purple-700"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <ShieldCheck className={`h-6 w-6 mb-2 ${role === "admin" ? "text-purple-600" : "text-slate-400"}`} />
-                <span className="text-sm font-semibold">Admin</span>
-              </button>
             </div>
           </div>
 
@@ -273,23 +262,20 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={loading}
                 className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === "rescue"
-                  ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-                  : role === "volunteer"
-                    ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-                    : role === "admin"
-                      ? "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                    ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                    : role === "volunteer"
+                      ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
                       : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
                   }`}
               >
-                Register as {
-                  role === "citizen"
+                {loading
+                  ? "Creating Account..."
+                  : `Register as ${role === "citizen"
                     ? "Citizen"
                     : role === "volunteer"
                       ? "Volunteer"
-                      : role === "rescue"
-                        ? "Rescue Team"
-                        : "Administrator"
-                }
+                      : "Rescue Team"
+                  }`}
               </button>
             </div>
           </form>

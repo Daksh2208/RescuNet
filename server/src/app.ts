@@ -12,6 +12,9 @@ import geocodeRoutes from "./routes/geocode.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import fosterRoutes from "./routes/foster.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import adminUserRoutes from "./routes/adminUser.routes.js";
+import adminIncidentRoutes from "./routes/adminIncident.routes.js";
+import adminResourceRoutes from "./routes/adminResource.routes.js";
 
 const app = express();
 
@@ -39,6 +42,9 @@ app.use("/api/geocode", geocodeRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/foster", fosterRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin/users", adminUserRoutes);
+app.use("/api/admin/incidents", adminIncidentRoutes);
+app.use("/api/admin/resources", adminResourceRoutes);
 
 app.get("/", (_, res) => {
   res.json({

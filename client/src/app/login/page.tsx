@@ -46,9 +46,8 @@ export default function LoginPage() {
         res.data.accessToken
       );
 
-      // Use the role selected in the UI rather than the backend response to allow easy testing of all modules
-      const userRole = role.toLowerCase();
-      
+      const userRole = res.data.user.role.toLowerCase();
+
       localStorage.setItem("userRole", userRole);
 
       if (userRole === "citizen") {
@@ -99,63 +98,9 @@ export default function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm border border-slate-200 sm:rounded-2xl sm:px-10">
-          
+
           {/* Role Selection */}
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-slate-700 mb-3">Select your role</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <button
-                type="button"
-                onClick={() => setRole("citizen")}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "citizen"
-                  ? "border-red-600 bg-red-50 text-red-700"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <Users className={`h-6 w-6 mb-2 ${role === "citizen" ? "text-red-600" : "text-slate-400"}`} />
-                <span className="text-sm font-semibold">Citizen</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("volunteer")}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "volunteer"
-                  ? "border-green-600 bg-green-50 text-green-700"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <HeartHandshake
-                  className={`h-6 w-6 mb-2 ${role === "volunteer" ? "text-green-600" : "text-slate-400"
-                    }`}
-                />
-                <span className="text-sm font-semibold">Volunteer</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("rescue")}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "rescue"
-                  ? "border-blue-600 bg-blue-50 text-blue-700"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <Truck className={`h-6 w-6 mb-2 ${role === "rescue" ? "text-blue-600" : "text-slate-400"}`} />
-                <span className="text-sm font-semibold">Rescue</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "admin"
-                  ? "border-purple-600 bg-purple-50 text-purple-700"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <ShieldCheck className={`h-6 w-6 mb-2 ${role === "admin" ? "text-purple-600" : "text-slate-400"}`} />
-                <span className="text-sm font-semibold">Admin</span>
-              </button>
-            </div>
-          </div>
+          
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
@@ -232,15 +177,7 @@ export default function LoginPage() {
                     ?
                     "Signing In..."
                     :
-                    `Sign In as ${
-                      role === "citizen"
-                        ? "Citizen"
-                        : role === "volunteer"
-                          ? "Volunteer"
-                          : role === "rescue"
-                            ? "Rescue Team"
-                            : "Administrator"
-                    }`
+                    "Sign In"
                 }
               </button>
             </div>
