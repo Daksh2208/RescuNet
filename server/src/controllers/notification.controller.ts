@@ -1,58 +1,93 @@
 import type { Response } from "express";
 import type { AuthRequest } from "../middleware/auth.middleware.js";
+
 import {
   getUserNotifications,
   markNotificationAsRead,
-  markAllNotificationsAsRead,
 } from "../services/notification.service.js";
 
-export const getNotifications = async (req: AuthRequest, res: Response) => {
+export const getNotifications = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
-    const userId = req.user!.id;
-    const notifications = await getUserNotifications(userId);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const notifications = await getUserNotifications(
+      req.user.id
+    );
+
     return res.status(200).json({
       success: true,
-      notifications,
+      data: notifications,
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error(error);
+
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to fetch notifications",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch notifications",
     });
   }
 };
 
-export const markAsRead = async (req: AuthRequest, res: Response) => {
+export const markNotificationAsReadController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
-    const { id } = req.params;
-    const userId = req.user!.id;
-    await markNotificationAsRead(id as string, userId);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const notificationId = req.params.id as string;
+
+    const notification = await markNotificationAsRead(
+      notificationId,
+      req.user.id
+    );
 
     return res.status(200).json({
       success: true,
       message: "Notification marked as read",
+      data: notification,
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error(error);
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to mark notification as read";
+
+    if (message === "Notification not found") {
+      return res.status(404).json({
+        success: false,
+        message,
+      });
+    }
+
+    if (message === "Unauthorized") {
+      return res.status(403).json({
+        success: false,
+        message,
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to update notification",
-    });
-  }
-};
-
-export const markAllAsRead = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    await markAllNotificationsAsRead(userId);
-
-    return res.status(200).json({
-      success: true,
-      message: "All notifications marked as read",
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update notifications",
+      message,
     });
   }
 };

@@ -1,52 +1,55 @@
 import { prisma } from "../config/prisma.js";
 
-export interface CreateNotificationDTO {
-  userId: string;
-  title: string;
-  message: string;
-}
-
 export const getUserNotifications = async (userId: string) => {
-  return await prisma.notification.findMany({
+  return prisma.notification.findMany({
     where: {
       userId,
     },
     orderBy: {
       createdAt: "desc",
     },
-  });
-};
-
-export const createNotification = async (data: CreateNotificationDTO) => {
-  return await prisma.notification.create({
-    data: {
-      userId: data.userId,
-      title: data.title,
-      message: data.message,
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      isRead: true,
+      createdAt: true,
     },
   });
 };
 
-export const markNotificationAsRead = async (notificationId: string, userId: string) => {
-  return await prisma.notification.updateMany({
+export const markNotificationAsRead = async (
+  notificationId: string,
+  userId: string
+) => {
+  const notification = await prisma.notification.findUnique({
     where: {
       id: notificationId,
-      userId,
-    },
-    data: {
-      isRead: true,
     },
   });
-};
 
-export const markAllNotificationsAsRead = async (userId: string) => {
-  return await prisma.notification.updateMany({
+  if (!notification) {
+    throw new Error("Notification not found");
+  }
+
+  // Prevent one user from modifying another user's notification
+  if (notification.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return prisma.notification.update({
     where: {
-      userId,
-      isRead: false,
+      id: notificationId,
     },
     data: {
       isRead: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      isRead: true,
+      createdAt: true,
     },
   });
 };
