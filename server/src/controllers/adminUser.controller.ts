@@ -10,6 +10,7 @@ import {
     deactivateUser,
     activateUser,
 } from "../services/adminUser.service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 export const pendingUsers = async (
     req: AuthRequest,
@@ -37,9 +38,22 @@ export const approveUserController = async (
     res: Response
 ) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
         const id = req.params.id as string;
 
         const user = await approveUser(id);
+
+        await createAuditLog({
+            adminId: req.user.id,
+            action: "USER_APPROVED",
+            details: `Approved ${user.role} user "${user.fullName}" (${user.id}).`,
+        });
 
         return res.status(200).json({
             success: true,
@@ -64,6 +78,19 @@ export const rejectUserController = async (
         const id = req.params.id as string;
 
         const user = await rejectUser(id);
+
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        await createAuditLog({
+            adminId: req.user.id,
+            action: "USER_REJECTED",
+            details: `Rejected ${user.role} user "${user.fullName}" (${user.id}).`,
+        });
 
         return res.status(200).json({
             success: true,
@@ -131,6 +158,19 @@ export const deactivateUserController = async (
 
         const user = await deactivateUser(id);
 
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        await createAuditLog({
+            adminId: req.user.id,
+            action: "USER_DEACTIVATED",
+            details: `Deactivated ${user.role} user "${user.fullName}" (${user.id}).`,
+        });
+
         return res.status(200).json({
             success: true,
             message: "User deactivated successfully",
@@ -154,6 +194,19 @@ export const activateUserController = async (
         const id = req.params.id as string;
 
         const user = await activateUser(id);
+
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        await createAuditLog({
+            adminId: req.user.id,
+            action: "USER_ACTIVATED",
+            details: `Activated ${user.role} user "${user.fullName}" (${user.id}).`,
+        });
 
         return res.status(200).json({
             success: true,

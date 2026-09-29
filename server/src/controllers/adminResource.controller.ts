@@ -11,6 +11,7 @@ import {
   updateResource,
   deleteResource,
 } from "../services/adminResource.service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 /* =========================
    SHELTERS
@@ -47,6 +48,19 @@ export const createShelterController = async (
   try {
     const shelter = await createShelter(req.body);
 
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "SHELTER_CREATED",
+      details: `Created shelter "${shelter.name}" (${shelter.id}).`,
+    });
+
     return res.status(201).json({
       success: true,
       message: "Shelter created successfully",
@@ -77,6 +91,19 @@ export const updateShelterController = async (
       req.body
     );
 
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "SHELTER_UPDATED",
+      details: `Updated shelter "${shelter.name}" (${shelter.id}).`,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Shelter updated successfully",
@@ -102,7 +129,20 @@ export const deleteShelterController = async (
   try {
     const id = req.params.id as string;
 
-    await deleteShelter(id);
+    const shelter = await deleteShelter(id);
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "SHELTER_DELETED",
+      details: `Deleted shelter "${shelter.name}" (${shelter.id}).`,
+    });
 
     return res.status(200).json({
       success: true,
@@ -156,6 +196,19 @@ export const createResourceController = async (
   try {
     const resource = await createResource(req.body);
 
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "RESOURCE_CREATED",
+      details: `Created resource "${resource.name}" (${resource.id}) with quantity ${resource.quantity} ${resource.unit}.`,
+    });
+
     return res.status(201).json({
       success: true,
       message: "Resource created successfully",
@@ -186,6 +239,19 @@ export const updateResourceController = async (
       req.body
     );
 
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "RESOURCE_UPDATED",
+      details: `Updated resource "${resource.name}" (${resource.id}).`,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Resource updated successfully",
@@ -211,7 +277,20 @@ export const deleteResourceController = async (
   try {
     const id = req.params.id as string;
 
-    await deleteResource(id);
+    const resource = await deleteResource(id);
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await createAuditLog({
+      adminId: req.user.id,
+      action: "RESOURCE_DELETED",
+      details: `Deleted resource "${resource.name}" (${resource.id}).`,
+    });
 
     return res.status(200).json({
       success: true,

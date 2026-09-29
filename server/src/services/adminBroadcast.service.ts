@@ -1,4 +1,5 @@
 import { prisma } from "../config/prisma.js";
+import { createAuditLog } from "./auditLog.service.js";
 
 type BroadcastSeverity =
   | "CRITICAL"
@@ -11,6 +12,7 @@ type BroadcastRole =
   | "RESCUE";
 
 export const sendBroadcast = async (data: {
+  adminId: string;
   message: string;
   severity: BroadcastSeverity;
   roles: BroadcastRole[];
@@ -86,6 +88,17 @@ export const sendBroadcast = async (data: {
     data: notifications,
   });
 
+  await createAuditLog({
+  adminId: data.adminId,
+  action: "EMERGENCY_BROADCAST_TRIGGERED",
+  details: `Broadcasted "${data.severity}" message to ${result.count} users.`,
+  metadata: {
+    severity: data.severity,
+    roles: data.roles,
+    recipientCount: result.count,
+  },
+});
+
   return {
     recipientCount: result.count,
     severity: data.severity,
@@ -94,3 +107,4 @@ export const sendBroadcast = async (data: {
     message,
   };
 };
+

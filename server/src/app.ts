@@ -16,6 +16,7 @@ import adminUserRoutes from "./routes/adminUser.routes.js";
 import adminIncidentRoutes from "./routes/adminIncident.routes.js";
 import adminResourceRoutes from "./routes/adminResource.routes.js";
 import adminBroadcastRoutes from "./routes/adminBroadcast.routes.js";
+import adminAuditLogRoutes from "./routes/adminAuditLog.routes.js";
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/incidents", adminIncidentRoutes);
 app.use("/api/admin/resources", adminResourceRoutes);
 app.use("/api/admin/broadcast", adminBroadcastRoutes);
+app.use("/api/admin/audit-logs", adminAuditLogRoutes);
 
 app.get("/", (_, res) => {
   res.json({

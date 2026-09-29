@@ -10,6 +10,13 @@ export const sendBroadcastController = async (
   res: Response
 ) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
     const {
       message,
       severity,
@@ -17,6 +24,7 @@ export const sendBroadcastController = async (
     } = req.body;
 
     const result = await sendBroadcast({
+      adminId: req.user.id,
       message,
       severity,
       roles,
@@ -24,8 +32,7 @@ export const sendBroadcastController = async (
 
     return res.status(201).json({
       success: true,
-      message:
-        "Broadcast sent successfully",
+      message: "Broadcast sent successfully",
       data: result,
     });
   } catch (error) {

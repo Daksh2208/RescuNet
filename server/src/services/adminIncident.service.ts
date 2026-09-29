@@ -1,4 +1,5 @@
 import { prisma } from "../config/prisma.js";
+import { createAuditLog } from "./auditLog.service.js";
 
 export const getPendingIncidents = async () => {
   return prisma.incident.findMany({
@@ -131,7 +132,7 @@ export const verifyIncident = async (
     );
   }
 
-  return prisma.incident.update({
+  const updatedIncident = await prisma.incident.update({
     where: {
       id: incidentId,
     },
@@ -153,6 +154,14 @@ export const verifyIncident = async (
       },
     },
   });
+
+  await createAuditLog({
+    adminId,
+    action: "INCIDENT_VERIFIED",
+    details: `Verified incident "${updatedIncident.title}" (${updatedIncident.id}).`,
+  });
+
+  return updatedIncident;
 };
 
 export const rejectIncident = async (
@@ -175,26 +184,36 @@ export const rejectIncident = async (
     );
   }
 
-  return prisma.incident.update({
-    where: {
-      id: incidentId,
-    },
-    data: {
-      status: "REJECTED",
-      verifiedById: adminId,
-    },
-    select: {
-      id: true,
-      title: true,
-      status: true,
-      severity: true,
-      disasterType: true,
-      verifiedBy: {
-        select: {
-          id: true,
-          fullName: true,
+   const updatedIncident =
+    await prisma.incident.update({
+      where: {
+        id: incidentId,
+      },
+      data: {
+        status: "REJECTED",
+        verifiedById: adminId,
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        severity: true,
+        disasterType: true,
+        verifiedBy: {
+          select: {
+            id: true,
+            fullName: true,
+          },
         },
       },
-    },
+    });
+
+  await createAuditLog({
+    adminId,
+    action: "INCIDENT_REJECTED",
+    details: `Rejected incident "${updatedIncident.title}" (${updatedIncident.id}).`,
   });
+
+
+  return updatedIncident;
 };
