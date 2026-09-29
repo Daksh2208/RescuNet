@@ -4,7 +4,7 @@ export const getCurrentUser = async () => {
 
     const res = await api.get("/auth/me");
 
-    return res.data.user;
+    return res.data.data;
 
 };
 

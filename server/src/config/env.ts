@@ -11,6 +11,8 @@ export const env = {
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET!,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
 
+  ADMIN_REGISTRATION_KEY: process.env.ADMIN_REGISTRATION_KEY!,
+
   ACCESS_TOKEN_EXPIRES_IN:
     (process.env.ACCESS_TOKEN_EXPIRES_IN ?? "15m") as StringValue,
 

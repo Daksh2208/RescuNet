@@ -3,6 +3,8 @@ import { hashPassword } from "../utils/hash.js";
 import { prisma } from "../config/prisma.js";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
+import bcrypt from "bcryptjs";
+
 
 import { comparePassword } from "../utils/hash.js";
 import {
@@ -160,4 +162,91 @@ export const refreshAccessToken = async (refreshToken: string) => {
   );
 
   return accessToken;
+};
+
+export const getCurrentUser = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      role: true,
+      isVerified: true,
+      isActive: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
+
+export const registerAdmin = async (data: {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+  adminKey: string;
+}) => {
+  if (!data.adminKey) {
+    throw new Error("Admin registration key is required");
+  }
+
+  if (data.adminKey !== env.ADMIN_REGISTRATION_KEY) {
+    throw new Error("Invalid admin registration key");
+  }
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: data.email },
+        { phone: data.phone },
+      ],
+    },
+  });
+
+  if (existingUser) {
+    if (existingUser.email === data.email) {
+      throw new Error("Email is already registered");
+    }
+
+    throw new Error("Phone number is already registered");
+  }
+
+  if (data.password.length < 8) {
+    throw new Error("Password must be at least 8 characters");
+  }
+
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  const admin = await prisma.user.create({
+    data: {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      password: hashedPassword,
+      role: "ADMIN",
+      isVerified: true,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      role: true,
+      isVerified: true,
+      isActive: true,
+      createdAt: true,
+    },
+  });
+
+  return admin;
 };

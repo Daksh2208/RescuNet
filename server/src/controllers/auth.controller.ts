@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import { refreshAccessToken, registerUser } from "../services/auth.service.js";
+import { refreshAccessToken, registerAdmin, registerUser } from "../services/auth.service.js";
 import { loginUser } from "../services/auth.service.js";
 import { prisma } from "../config/prisma.js";
 import type { AuthRequest } from "../middleware/auth.middleware.js";
-
+import { getCurrentUser } from "../services/auth.service.js";
 
 export const register = async (
   req: Request,
@@ -145,4 +145,70 @@ export const refresh = async (
 
     }
 
+};
+
+export const getMe = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const user = await getCurrentUser(
+      req.user.id
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch profile",
+    });
+  }
+};
+
+export const registerAdminController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { fullName, email, phone, password, adminKey } = req.body;
+
+    const admin = await registerAdmin({
+      fullName,
+      email,
+      phone,
+      password,
+      adminKey,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Admin registration successful",
+      data: admin,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Admin registration failed",
+    });
+  }
 };

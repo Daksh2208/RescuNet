@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { login, logout, refresh, register } from "../controllers/auth.controller.js";
+import { getMe, login, logout, refresh, register, registerAdminController } from "../controllers/auth.controller.js";
 
 import { loginValidator, registerValidator } from "../validators/auth.validator.js";
 
@@ -28,7 +28,14 @@ router.post("/refresh", refresh);
 
 router.post("/logout", logout);
 
-router.get("/me", authenticate, me);
+router.post("/register-admin", registerAdminController);
+// router.get("/me", authenticate, me);
+
+router.get(
+  "/me",
+  authenticate,
+  getMe
+);
 
 // router.post("/forgot-password");
 

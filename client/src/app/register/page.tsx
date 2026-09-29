@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 
 export default function RegisterPage() {
-  const [role, setRole] = useState<"citizen" | "volunteer" | "rescue">("citizen");
+  const [role, setRole] = useState<"citizen" | "volunteer" | "rescue" | "admin">("citizen");
 
   const router = useRouter();
 
@@ -18,62 +18,62 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [adminKey, setAdminKey] = useState("");
 
   const handleRegister = async (
     e: React.FormEvent
   ) => {
-
     e.preventDefault();
 
     if (password !== confirmPassword) {
-
       alert("Passwords do not match");
-
       return;
+    }
 
+    if (role === "admin" && !adminKey.trim()) {
+      alert("Admin registration key is required");
+      return;
     }
 
     try {
-
       setLoading(true);
 
-      await api.post(
-        "/auth/register",
-        {
-
+      if (role === "admin") {
+        await api.post("/auth/register-admin", {
           fullName,
-
           email,
-
           phone,
-
           password,
+          adminKey,
+        });
+      } else {
+        await api.post("/auth/register", {
+          fullName,
+          email,
+          phone,
+          password,
+          role: role.toUpperCase(),
+        });
+      }
 
-          role: role.toUpperCase()
-
-        }
+      alert(
+        role === "admin"
+          ? "Admin registration successful"
+          : "Registration successful"
       );
 
-      alert("Registration Successful");
-
       router.push("/login");
-
     } catch (err: any) {
-
       console.log(err);
+
       alert(
         err.response?.data?.message ||
         "Registration failed"
       );
-
-
     } finally {
-
       setLoading(false);
-
     }
-
-  }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -140,6 +140,22 @@ export default function RegisterPage() {
               >
                 <Truck className={`h-6 w-6 mb-2 ${role === "rescue" ? "text-blue-600" : "text-slate-400"}`} />
                 <span className="text-sm font-semibold">Rescue</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${role === "admin"
+                  ? "border-purple-600 bg-purple-50 text-purple-700"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+              >
+                <ShieldCheck
+                  className={`h-6 w-6 mb-2 ${role === "admin" ? "text-purple-600" : "text-slate-400"
+                    }`}
+                />
+
+                <span className="text-sm font-semibold">Admin</span>
               </button>
 
             </div>
@@ -244,6 +260,34 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {role === "admin" && (
+              <div>
+                <label
+                  htmlFor="adminKey"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Admin Registration Key
+                </label>
+
+                <div className="mt-1">
+                  <input
+                    id="adminKey"
+                    name="adminKey"
+                    type="password"
+                    value={adminKey}
+                    onChange={(e) => setAdminKey(e.target.value)}
+                    required
+                    placeholder="Enter admin registration key"
+                    className="appearance-none block w-full px-3 py-2 border border-purple-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition-colors"
+                  />
+                </div>
+
+                <p className="mt-1.5 text-xs text-purple-600">
+                  Admin accounts require an authorized registration key.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center">
               <input
                 id="terms"
@@ -261,7 +305,9 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === "rescue"
+                className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === "admin"
+                  ? "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                  : role === "rescue"
                     ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
                     : role === "volunteer"
                       ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
@@ -274,7 +320,9 @@ export default function RegisterPage() {
                     ? "Citizen"
                     : role === "volunteer"
                       ? "Volunteer"
-                      : "Rescue Team"
+                      : role === "rescue"
+                        ? "Rescue Team"
+                        : "Admin"
                   }`}
               </button>
             </div>
@@ -287,15 +335,13 @@ export default function RegisterPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-slate-700">
-                  {
-                    role === "citizen"
-                      ? "Need to report an emergency?"
-                      : role === "volunteer"
-                        ? "Ready to help your community?"
-                        : role === "rescue"
-                          ? "Ready to deploy?"
-                          : "Applying for admin access?"
-                  }
+                  {role === "citizen"
+                    ? "Need to report an emergency?"
+                    : role === "volunteer"
+                      ? "Ready to help your community?"
+                      : role === "rescue"
+                        ? "Ready to deploy?"
+                        : "Authorized personnel only"}
                 </span>
               </div>
             </div>
