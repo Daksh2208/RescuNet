@@ -5,10 +5,10 @@ export const requireAdmin = (req, res, next) => {
             message: "Unauthorized",
         });
     }
-    if (req.user.role !== "ADMIN") {
+    if (req.user.role?.toUpperCase() !== "ADMIN") {
         return res.status(403).json({
             success: false,
-            message: "Admin access required",
+            message: "Admin access required. Current role: " + (req.user.role || "unknown"),
         });
     }
     next();

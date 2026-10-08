@@ -138,6 +138,63 @@ export default function AdminLayout({
     navigation.find((item) => item.href === pathname)?.name ||
     "Command Center";
 
+  if (loadingUser) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
+        <Loader2 className="h-10 w-10 animate-spin text-purple-500 mb-4" />
+        <p className="text-sm font-semibold tracking-wider text-slate-400 uppercase">
+          Verifying Command Clearance...
+        </p>
+      </div>
+    );
+  }
+
+  if (userData && userData.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
+          <ShieldAlert className="w-8 h-8 text-red-500" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">Restricted Command Center</h1>
+        <p className="text-slate-400 max-w-md text-sm mb-6">
+          You are authenticated as <span className="text-purple-400 font-semibold">{userData.fullName}</span> with role <span className="font-mono bg-slate-800 text-amber-400 px-2 py-0.5 rounded text-xs">{userData.role}</span>. Administrator clearance is required to access the dispatch command room.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {userData.role === "RESCUE" && (
+            <Link
+              href="/rescue"
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition"
+            >
+              Go to Rescue Team Portal
+            </Link>
+          )}
+          {userData.role === "VOLUNTEER" && (
+            <Link
+              href="/volunteer"
+              className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-medium text-sm transition"
+            >
+              Go to Volunteer Portal
+            </Link>
+          )}
+          {userData.role === "CITIZEN" && (
+            <Link
+              href="/citizen"
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm transition"
+            >
+              Go to Citizen Portal
+            </Link>
+          )}
+          <button
+            onClick={handleLogout}
+            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-sm transition border border-slate-700"
+          >
+            Switch Account / Login as Admin
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
 

@@ -129,37 +129,35 @@ export const loginUser = async (
 };
 
 export const refreshAccessToken = async (refreshToken: string) => {
-
   if (!refreshToken) {
     throw new Error("Refresh token missing");
   }
 
-  const decoded = jwt.verify(
-    refreshToken,
-    env.JWT_REFRESH_SECRET
-  ) as {
-    id: string;
-  };
+  jwt.verify(refreshToken, env.JWT_REFRESH_SECRET);
 
   const tokenInDb = await prisma.refreshToken.findUnique({
     where: {
       token: refreshToken,
     },
+    include: {
+      user: true,
+    },
   });
 
-  if (!tokenInDb) {
+  if (!tokenInDb || !tokenInDb.user) {
     throw new Error("Invalid refresh token");
   }
 
-  const accessToken = jwt.sign(
-    {
-      id: decoded.id,
-    },
-    env.JWT_ACCESS_SECRET,
-    {
-      expiresIn: "15m",
-    }
-  );
+  if (new Date() > tokenInDb.expiresAt) {
+    await prisma.refreshToken.delete({ where: { token: refreshToken } }).catch(() => {});
+    throw new Error("Refresh token expired");
+  }
+
+  const accessToken = generateAccessToken({
+    id: tokenInDb.user.id,
+    role: tokenInDb.user.role,
+    email: tokenInDb.user.email,
+  });
 
   return accessToken;
 };

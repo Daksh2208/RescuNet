@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   Map as MapIcon, 
   Layers, 
@@ -27,7 +28,10 @@ import {
   CheckCircle2,
   ShieldAlert,
   Search,
-  Users
+  Users,
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -107,10 +111,17 @@ const severityColors: Record<string, { bg: string; text: string; border: string;
   LOW: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-300", hex: "#2563eb" },
 };
 
-export default function RescueMapPage() {
+function RescueMapContent() {
+  const searchParams = useSearchParams();
+  const paramLat = searchParams.get("lat");
+  const paramLng = searchParams.get("lng");
+  const paramIncidentId = searchParams.get("incidentId");
+
   const [data, setData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [isCachedOffline, setIsCachedOffline] = useState(false);
 
   // Map viewport state
   const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 });
@@ -131,37 +142,83 @@ export default function RescueMapPage() {
   const [selectedDisasterFilter, setSelectedDisasterFilter] = useState("ALL");
   const [selectedSeverityFilter, setSelectedSeverityFilter] = useState("ALL");
 
-  useEffect(() => {
-    const fetchMapData = async () => {
-      try {
+  const fetchMapData = async (isManualRefresh = false) => {
+    try {
+      if (isManualRefresh) {
+        setRefreshing(true);
+      } else {
         setLoading(true);
-        setError("");
-        const res = await api.get("/rescue/map/data");
-        const mapData: MapData = res.data.data;
-        setData(mapData);
+      }
+      setError("");
 
-        // Auto center on first valid incident or shelter
-        if (mapData.incidents && mapData.incidents.length > 0) {
-          const first = mapData.incidents.find(i => i.latitude !== 0 && i.longitude !== 0);
-          if (first) {
-            setMapCenter({ lat: first.latitude, lng: first.longitude });
-            setMapZoom(12);
+      const res = await api.get("/rescue/map/data");
+      const mapData: MapData = res.data.data || { incidents: [], shelters: [], rescueUnits: [] };
+      setData(mapData);
+      setIsCachedOffline(false);
+
+      // Save valid telemetry in localStorage cache for field offline contingency
+      try {
+        localStorage.setItem("rescue_map_telemetry_cache", JSON.stringify(mapData));
+      } catch (e) {
+        // quota ignore
+      }
+
+      // Priority 1: URL Parameters from Mission / Alert dispatch
+      if (paramLat && paramLng) {
+        const lat = parseFloat(paramLat);
+        const lng = parseFloat(paramLng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setMapCenter({ lat, lng });
+          setMapZoom(16);
+
+          if (paramIncidentId && mapData.incidents) {
+            const target = mapData.incidents.find((i) => i.id === paramIncidentId);
+            if (target) {
+              setSelectedIncident(target);
+            }
           }
-        } else if (mapData.shelters && mapData.shelters.length > 0) {
-          const first = mapData.shelters[0];
+          return;
+        }
+      }
+
+      // Priority 2: Auto center on first valid incident or shelter
+      if (mapData.incidents && mapData.incidents.length > 0) {
+        const first = mapData.incidents.find(i => i.latitude !== 0 && i.longitude !== 0);
+        if (first) {
           setMapCenter({ lat: first.latitude, lng: first.longitude });
           setMapZoom(12);
         }
-      } catch (err: any) {
-        console.error("Failed to load map data:", err);
-        setError(err.response?.data?.message || "Failed to load map data");
-      } finally {
-        setLoading(false);
+      } else if (mapData.shelters && mapData.shelters.length > 0) {
+        const first = mapData.shelters[0];
+        setMapCenter({ lat: first.latitude, lng: first.longitude });
+        setMapZoom(12);
       }
-    };
+    } catch (err: any) {
+      console.error("Failed to load live map data, attempting cached recovery:", err);
+      // Fallback to local storage if network or DB timed out
+      try {
+        const cached = localStorage.getItem("rescue_map_telemetry_cache");
+        if (cached) {
+          const parsedCache: MapData = JSON.parse(cached);
+          setData(parsedCache);
+          setIsCachedOffline(true);
+          setError("Using cached radar telemetry. Database connection reconnecting...");
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
+      setError(err.response?.data?.message || "Failed to reach live GIS database. Retrying in background...");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMapData();
-  }, []);
+  }, [paramLat, paramLng, paramIncidentId]);
+
 
   const handleMyLocation = () => {
     if (!navigator.geolocation) {
@@ -216,15 +273,35 @@ export default function RescueMapPage() {
         {/* Tactical Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-              <MapIcon className="h-6 w-6 text-blue-600" />
-              Tactical Command & Dispatch Map
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                <MapIcon className="h-6 w-6 text-blue-600" />
+                Tactical Command & Dispatch Map
+              </h1>
+              {isCachedOffline ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full animate-pulse">
+                  <WifiOff className="h-3 w-3" /> Offline Cache Mode
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <Wifi className="h-3 w-3" /> Live GIS Radar
+                </span>
+              )}
+            </div>
             <p className="text-slate-500 text-xs mt-0.5">
-              Live geospatial situational awareness for incident response, casualty tracking, and unit deployment
+              Geospatial situational awareness for incident response, casualty tracking, and unit deployment
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => fetchMapData(true)}
+              disabled={refreshing}
+              className="text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              title="Refresh Radar Telemetry"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-blue-600 ${refreshing ? "animate-spin" : ""}`} />
+              {refreshing ? "Syncing..." : "Sync Radar"}
+            </button>
             <Link 
               href="/rescue/missions"
               className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3.5 py-2 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
@@ -499,19 +576,30 @@ export default function RescueMapPage() {
               </div>
             </div>
 
+            {/* Non-intrusive Offline / Error Alert */}
+            {error && (
+              <div className="p-2.5 mx-3 mt-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs flex items-center justify-between gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 truncate">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span className="truncate text-[11px] font-medium">{error}</span>
+                </div>
+                <button
+                  onClick={() => fetchMapData(true)}
+                  className="px-2 py-0.5 text-[10px] font-bold bg-amber-200/80 hover:bg-amber-300 text-amber-900 rounded shrink-0 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             {/* Tactical Incident Feed / Inspector */}
             <div className="flex-1 overflow-y-auto p-3.5 space-y-3">
-              {loading ? (
+              {loading && !data ? (
                 <div className="py-16 text-center text-slate-500">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
                   <p className="text-xs font-semibold">Aggregating incident telemetry...</p>
                 </div>
-              ) : error ? (
-                <div className="p-4 bg-red-50 text-red-700 rounded-xl text-center">
-                  <AlertTriangle className="h-6 w-6 mx-auto mb-1 text-red-500" />
-                  <p className="text-xs font-bold">{error}</p>
-                </div>
-              ) : incidents.length === 0 ? (
+              ) : incidents.length === 0 && !loading ? (
                 <div className="py-16 text-center text-slate-400">
                   <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                   <p className="text-sm font-bold text-slate-700">No matching active hazards</p>
@@ -737,3 +825,19 @@ export default function RescueMapPage() {
     </APIProvider>
   );
 }
+
+export default function RescueMapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-28 text-slate-500">
+          <Loader2 className="h-10 w-10 text-blue-600 animate-spin mb-3" />
+          <p className="text-sm font-semibold tracking-wide uppercase">Initializing Tactical GIS Radar...</p>
+        </div>
+      }
+    >
+      <RescueMapContent />
+    </Suspense>
+  );
+}
+

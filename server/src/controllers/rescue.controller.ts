@@ -361,7 +361,7 @@ export const getProtocol = async (req: AuthRequest, res: Response) => {
 export const listActionReports = async (req: AuthRequest, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
-    const reports = await getActionReports(req.user!.id, status);
+    const reports = await getActionReports(req.user!.id, status, req.user?.role);
     return res.status(200).json({ success: true, data: reports });
   } catch (error: any) {
     console.error(error);
@@ -375,7 +375,7 @@ export const listActionReports = async (req: AuthRequest, res: Response) => {
 export const getReport = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const report = await getActionReportById(id as string, req.user!.id);
+    const report = await getActionReportById(id as string, req.user!.id, req.user?.role);
     return res.status(200).json({ success: true, data: report });
   } catch (error: any) {
     return res.status(404).json({

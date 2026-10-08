@@ -309,7 +309,7 @@ export const getProtocol = async (req, res) => {
 export const listActionReports = async (req, res) => {
     try {
         const status = req.query.status;
-        const reports = await getActionReports(req.user.id, status);
+        const reports = await getActionReports(req.user.id, status, req.user?.role);
         return res.status(200).json({ success: true, data: reports });
     }
     catch (error) {
@@ -323,7 +323,7 @@ export const listActionReports = async (req, res) => {
 export const getReport = async (req, res) => {
     try {
         const { id } = req.params;
-        const report = await getActionReportById(id, req.user.id);
+        const report = await getActionReportById(id, req.user.id, req.user?.role);
         return res.status(200).json({ success: true, data: report });
     }
     catch (error) {

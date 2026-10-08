@@ -58,6 +58,8 @@ export default function AdminDashboard() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [shelters, setShelters] = useState<Shelter[]>([]);
 
+  const [verifiedIncidents, setVerifiedIncidents] = useState<Incident[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -69,12 +71,14 @@ export default function AdminDashboard() {
 
         const [
           incidentsResponse,
+          verifiedIncidentsResponse,
           pendingUsersResponse,
           activePersonnelResponse,
           resourcesResponse,
           sheltersResponse,
         ] = await Promise.all([
           api.get("/admin/incidents/pending"),
+          api.get("/admin/incidents/verified"),
           api.get("/admin/users/pending"),
           api.get("/admin/users/active"),
           api.get("/admin/resources"),
@@ -83,6 +87,10 @@ export default function AdminDashboard() {
 
         setPendingIncidents(
           incidentsResponse.data.data || []
+        );
+
+        setVerifiedIncidents(
+          verifiedIncidentsResponse.data.data || []
         );
 
         setPendingUsers(
@@ -122,18 +130,18 @@ export default function AdminDashboard() {
 
   const systemStats = [
     {
-      label: "Pending Incidents",
+      label: "Pending SOS Reports",
       value: pendingIncidents.length,
       icon: AlertTriangle,
       color: "text-red-600",
       bg: "bg-red-50",
     },
     {
-      label: "Pending Verification",
-      value: pendingUsers.length,
-      icon: Users,
-      color: "text-orange-600",
-      bg: "bg-orange-50",
+      label: "Active / Dispatched",
+      value: verifiedIncidents.length,
+      icon: CheckCircle2,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
     },
     {
       label: "Active Personnel",
@@ -146,8 +154,8 @@ export default function AdminDashboard() {
       label: "Managed Shelters",
       value: shelters.length,
       icon: Warehouse,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
     },
   ];
 

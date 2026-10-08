@@ -29,11 +29,11 @@ export default function RescueLayout({
   const navigation = [
     { name: "Dashboard", href: "/rescue", icon: LayoutDashboard },
     { name: "Active Missions", href: "/rescue/missions", icon: Truck },
-    { name: "Volunteer Dispatch", href: "/rescue/dispatcher", icon: Users },
-    { name: "Fleet & Equipment", href: "/rescue/fleet", icon: Wrench },
     { name: "Dispatch Map", href: "/rescue/map", icon: Map },
+    { name: "Volunteer Dispatch", href: "/rescue/dispatcher", icon: Users },
     { name: "Team Comms", href: "/rescue/comms", icon: MessageSquare },
     { name: "Action Reports", href: "/rescue/reports", icon: ClipboardType },
+    { name: "Tactical SOPs", href: "/rescue/protocols", icon: ShieldAlert },
     { name: "Profile", href: "/rescue/profile", icon: User },
   ];
 

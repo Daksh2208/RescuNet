@@ -11,29 +11,9 @@ export const getRescueDashboard = async (userId) => {
                 rescueTeamId: userId,
                 status: { in: [AssignmentStatus.PENDING, AssignmentStatus.ACCEPTED] },
             },
-            include: {
-                incident: {
-                    select: {
-                        id: true,
-                        title: true,
-                        disasterType: true,
-                        severity: true,
-                        status: true,
-                        latitude: true,
-                        longitude: true,
-                        address: true,
-                        createdAt: true,
-                    },
-                },
-                assignedBy: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                    },
-                },
-            },
+            include: assignmentInclude,
             orderBy: { assignedAt: "desc" },
-            take: 5,
+            take: 10,
         }),
         // Completed missions count
         prisma.assignment.count({
@@ -93,6 +73,9 @@ const assignmentInclude = {
             longitude: true,
             address: true,
             createdAt: true,
+            reportedBy: {
+                select: { id: true, fullName: true, phone: true, email: true },
+            },
             images: {
                 select: { id: true, imageUrl: true },
             },
@@ -377,96 +360,116 @@ export const updateFleetAsset = async (id, data) => {
         },
     });
 };
-// ──────────────────────────────────────────────
-// MAP DATA AGGREGATION
-// ──────────────────────────────────────────────
+// In-memory telemetry cache to ensure 100% tactical uptime if database reconnects
+let cachedMapTelemetry = {
+    incidents: [],
+    shelters: [],
+    rescueUnits: [],
+};
+// Resilient query executor with exponential backoff
+async function queryWithResilience(queryFn, fallback, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            return await queryFn();
+        }
+        catch (err) {
+            console.warn(`[GIS DB Attempt ${attempt + 1}/${retries + 1} Failed]:`, err?.message || err);
+            if (attempt === retries) {
+                return fallback;
+            }
+            // Wait 300ms, then 600ms before next retry to allow database/Neon wake up
+            await new Promise((resolve) => setTimeout(resolve, 300 * Math.pow(2, attempt)));
+        }
+    }
+    return fallback;
+}
 export const getMapData = async () => {
-    const [incidents, shelters, rescueUnits] = await Promise.all([
-        // Active incidents with geo data
-        prisma.incident.findMany({
-            where: {
-                status: {
-                    in: [
-                        IncidentStatus.PENDING,
-                        IncidentStatus.VERIFIED,
-                        IncidentStatus.ASSIGNED,
-                        IncidentStatus.IN_PROGRESS,
-                    ],
-                },
+    // Query each telemetry layer safely with retries and fallback
+    const incidents = await queryWithResilience(() => prisma.incident.findMany({
+        where: {
+            status: {
+                in: [
+                    IncidentStatus.PENDING,
+                    IncidentStatus.VERIFIED,
+                    IncidentStatus.ASSIGNED,
+                    IncidentStatus.IN_PROGRESS,
+                ],
             },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                disasterType: true,
-                severity: true,
-                status: true,
-                latitude: true,
-                longitude: true,
-                address: true,
-                createdAt: true,
-                images: {
-                    select: { id: true, imageUrl: true },
-                },
-                reportedBy: {
-                    select: { id: true, fullName: true, phone: true },
-                },
-                assignments: {
-                    select: {
-                        id: true,
-                        status: true,
-                        rescueTeam: {
-                            select: { id: true, fullName: true, phone: true },
-                        },
+        },
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            disasterType: true,
+            severity: true,
+            status: true,
+            latitude: true,
+            longitude: true,
+            address: true,
+            createdAt: true,
+            images: {
+                select: { id: true, imageUrl: true },
+            },
+            reportedBy: {
+                select: { id: true, fullName: true, phone: true },
+            },
+            assignments: {
+                select: {
+                    id: true,
+                    status: true,
+                    rescueTeam: {
+                        select: { id: true, fullName: true, phone: true },
                     },
                 },
             },
-            orderBy: { createdAt: "desc" },
-        }),
-        // All shelters with geo data
-        prisma.shelter.findMany({
-            select: {
-                id: true,
-                name: true,
-                type: true,
-                latitude: true,
-                longitude: true,
-                address: true,
-                contactNumber: true,
-                capacity: true,
-                occupied: true,
-            },
-        }),
-        // Rescue users (deployed units)
-        prisma.user.findMany({
-            where: { role: "RESCUE", isActive: true },
-            select: {
-                id: true,
-                fullName: true,
-                phone: true,
-                rescueAssignments: {
-                    where: {
-                        status: {
-                            in: [AssignmentStatus.PENDING, AssignmentStatus.ACCEPTED],
-                        },
+        },
+        orderBy: { createdAt: "desc" },
+    }), cachedMapTelemetry.incidents);
+    const shelters = await queryWithResilience(() => prisma.shelter.findMany({
+        select: {
+            id: true,
+            name: true,
+            type: true,
+            latitude: true,
+            longitude: true,
+            address: true,
+            contactNumber: true,
+            capacity: true,
+            occupied: true,
+        },
+    }), cachedMapTelemetry.shelters);
+    const rescueUnits = await queryWithResilience(() => prisma.user.findMany({
+        where: { role: "RESCUE", isActive: true },
+        select: {
+            id: true,
+            fullName: true,
+            phone: true,
+            rescueAssignments: {
+                where: {
+                    status: {
+                        in: [AssignmentStatus.PENDING, AssignmentStatus.ACCEPTED],
                     },
-                    select: {
-                        id: true,
-                        status: true,
-                        incident: {
-                            select: {
-                                latitude: true,
-                                longitude: true,
-                                address: true,
-                            },
-                        },
-                    },
-                    take: 1,
-                    orderBy: { assignedAt: "desc" },
                 },
+                select: {
+                    id: true,
+                    status: true,
+                    incident: {
+                        select: {
+                            latitude: true,
+                            longitude: true,
+                            address: true,
+                        },
+                    },
+                },
+                take: 1,
+                orderBy: { assignedAt: "desc" },
             },
-        }),
-    ]);
+        },
+    }), cachedMapTelemetry.rescueUnits);
+    // Update in-memory cache if we got valid responses
+    if (incidents.length > 0 || shelters.length > 0 || rescueUnits.length > 0) {
+        cachedMapTelemetry = { incidents, shelters, rescueUnits };
+    }
     return { incidents, shelters, rescueUnits };
 };
 // ──────────────────────────────────────────────
@@ -489,30 +492,44 @@ export const getProtocolById = async (id) => {
     }
     return protocol;
 };
-export const getActionReports = async (userId, status) => {
+export const getActionReports = async (userId, status, userRole) => {
     let statusFilter;
     if (status === "PENDING_REVIEW" ||
         status === "APPROVED" ||
         status === "REJECTED") {
         statusFilter = status;
     }
+    const isPrivileged = userRole?.toUpperCase() === "ADMIN";
     return prisma.actionReport.findMany({
         where: {
-            filedById: userId,
+            ...(isPrivileged ? {} : { filedById: userId }),
             ...(statusFilter ? { status: statusFilter } : {}),
         },
         include: {
             filedBy: {
-                select: { id: true, fullName: true },
+                select: { id: true, fullName: true, phone: true, email: true },
             },
             assignment: {
                 select: {
                     id: true,
+                    status: true,
+                    assignedAt: true,
+                    acceptedAt: true,
+                    completedAt: true,
                     incident: {
                         select: {
                             id: true,
                             title: true,
+                            description: true,
                             disasterType: true,
+                            severity: true,
+                            address: true,
+                            latitude: true,
+                            longitude: true,
+                            createdAt: true,
+                            reportedBy: {
+                                select: { id: true, fullName: true, phone: true },
+                            },
                         },
                     },
                 },
@@ -521,26 +538,38 @@ export const getActionReports = async (userId, status) => {
         orderBy: { createdAt: "desc" },
     });
 };
-export const getActionReportById = async (reportId, userId) => {
+export const getActionReportById = async (reportId, userId, userRole) => {
+    const isPrivileged = userRole?.toUpperCase() === "ADMIN";
     const report = await prisma.actionReport.findFirst({
         where: {
             id: reportId,
-            filedById: userId,
+            ...(isPrivileged ? {} : { filedById: userId }),
         },
         include: {
             filedBy: {
-                select: { id: true, fullName: true },
+                select: { id: true, fullName: true, phone: true, email: true },
             },
             assignment: {
                 select: {
                     id: true,
+                    status: true,
+                    assignedAt: true,
+                    acceptedAt: true,
+                    completedAt: true,
                     incident: {
                         select: {
                             id: true,
                             title: true,
+                            description: true,
                             disasterType: true,
                             severity: true,
                             address: true,
+                            latitude: true,
+                            longitude: true,
+                            createdAt: true,
+                            reportedBy: {
+                                select: { id: true, fullName: true, phone: true },
+                            },
                         },
                     },
                 },
