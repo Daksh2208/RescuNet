@@ -113,7 +113,7 @@ export default function AdminVerifyIncidentsPage() {
 
       setError(
         error.response?.data?.message ||
-          "Failed to fetch pending incidents"
+        "Failed to fetch pending incidents"
       );
     }
   };
@@ -137,7 +137,7 @@ export default function AdminVerifyIncidentsPage() {
 
       setError(
         error.response?.data?.message ||
-          "Failed to fetch verified incidents"
+        "Failed to fetch verified incidents"
       );
     }
   };
@@ -195,7 +195,7 @@ export default function AdminVerifyIncidentsPage() {
 
       setError(
         error.response?.data?.message ||
-          "Failed to verify incident"
+        "Failed to verify incident"
       );
     } finally {
       setActionLoading(null);
@@ -234,7 +234,7 @@ export default function AdminVerifyIncidentsPage() {
 
       setError(
         error.response?.data?.message ||
-          "Failed to reject incident"
+        "Failed to reject incident"
       );
     } finally {
       setActionLoading(null);
@@ -375,9 +375,8 @@ export default function AdminVerifyIncidentsPage() {
           >
 
             <RefreshCw
-              className={`h-4 w-4 ${
-                loading ? "animate-spin" : ""
-              }`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""
+                }`}
             />
 
             Refresh
@@ -422,11 +421,10 @@ export default function AdminVerifyIncidentsPage() {
                 setActiveTab("unverified");
                 setSearchTerm("");
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                activeTab === "unverified"
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "unverified"
                   ? "bg-white text-purple-700 shadow-sm border border-slate-200"
                   : "text-slate-500 hover:text-slate-700"
-              }`}
+                }`}
             >
               Unverified Queue ({incidents.length})
             </button>
@@ -436,11 +434,10 @@ export default function AdminVerifyIncidentsPage() {
                 setActiveTab("verified");
                 setSearchTerm("");
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                activeTab === "verified"
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "verified"
                   ? "bg-white text-purple-700 shadow-sm border border-slate-200"
                   : "text-slate-500 hover:text-slate-700"
-              }`}
+                }`}
             >
               Verified / Dispatched ({verifiedIncidents.length})
             </button>
@@ -645,7 +642,7 @@ export default function AdminVerifyIncidentsPage() {
                         >
 
                           {actionLoading ===
-                          incident.id ? (
+                            incident.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <ShieldCheck className="h-4 w-4" />
@@ -765,7 +762,7 @@ export default function AdminVerifyIncidentsPage() {
 
                         {incident.assignments &&
                           incident.assignments.length >
-                            0 && (
+                          0 && (
 
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
 
@@ -808,10 +805,10 @@ export default function AdminVerifyIncidentsPage() {
 
                             <span className="text-sm font-bold">
                               {incident.status ===
-                              "VERIFIED"
+                                "VERIFIED"
                                 ? "Verified"
                                 : incident.status ===
-                                    "ASSIGNED"
+                                  "ASSIGNED"
                                   ? "Dispatched"
                                   : "In Progress"}
                             </span>

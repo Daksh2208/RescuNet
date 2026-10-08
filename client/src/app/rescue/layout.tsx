@@ -3,14 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Truck, 
-  Map, 
-  MessageSquare, 
-  User, 
-  Menu, 
-  X, 
+import {
+  LayoutDashboard,
+  Truck,
+  Map,
+  MessageSquare,
+  User,
+  Menu,
+  X,
   ShieldAlert,
   Bell,
   Users,
@@ -63,11 +63,10 @@ export default function RescueLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                     ? "bg-blue-50 text-blue-700 font-semibold"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
                 {item.name}
@@ -98,7 +97,7 @@ export default function RescueLayout({
               ResQ<span className="text-blue-600">Net</span>
             </span>
           </Link>
-          
+
           <div className="flex items-center gap-4">
             <Link href="/rescue/notifications" className="text-slate-600 relative">
               <Bell className="h-6 w-6" />
@@ -124,11 +123,10 @@ export default function RescueLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                       ? "bg-blue-50 text-blue-700 font-semibold"
                       : "text-slate-600"
-                  }`}
+                    }`}
                 >
                   <Icon className={`h-5 w-5 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
                   {item.name}

@@ -66,7 +66,11 @@ api.interceptors.response.use(
         // Refresh token is invalid/expired
         setAccessToken("");
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          const publicPaths = ["/", "/login", "/register", "/forgot-password"];
+          const isPublicPath = publicPaths.includes(window.location.pathname);
+          if (!isPublicPath) {
+            window.location.href = "/login";
+          }
         }
         return Promise.reject(refreshError);
       }

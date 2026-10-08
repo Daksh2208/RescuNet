@@ -32,6 +32,9 @@ model User {
   fosterRequests        FosterRequest[]     @relation("FosterVolunteer")
   createdFosterReqs     FosterRequest[]     @relation("FosterCreatedBy")
   auditLogs AuditLog[]
+  commsMessages         RescueCommsMessage[]  @relation("CommsMessageSender")
+  fleetAssignments      FleetAsset[]          @relation("FleetAssignedTo")
+  actionReports         ActionReport[]        @relation("ReportFiledBy")
 }
 
 model Incident {
@@ -65,17 +68,18 @@ model IncidentImage {
 }
 
 model Assignment {
-  id           String           @id @default(uuid())
-  incidentId   String
-  rescueTeamId String
-  assignedById String
-  status       AssignmentStatus @default(PENDING)
-  assignedAt   DateTime         @default(now())
-  acceptedAt   DateTime?
-  completedAt  DateTime?
-  assignedBy   User             @relation("AssignedBy", fields: [assignedById], references: [id])
-  incident     Incident         @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  rescueTeam   User             @relation("RescueTeam", fields: [rescueTeamId], references: [id])
+  id            String           @id @default(uuid())
+  incidentId    String
+  rescueTeamId  String
+  assignedById  String
+  status        AssignmentStatus @default(PENDING)
+  assignedAt    DateTime         @default(now())
+  acceptedAt    DateTime?
+  completedAt   DateTime?
+  assignedBy    User             @relation("AssignedBy", fields: [assignedById], references: [id])
+  incident      Incident         @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  rescueTeam    User             @relation("RescueTeam", fields: [rescueTeamId], references: [id])
+  actionReports ActionReport[]
 }
 
 model Shelter {
@@ -324,4 +328,80 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   admin User @relation(fields: [adminId], references: [id])
+}
+
+model RescueCommsChannel {
+  id        String               @id @default(uuid())
+  name      String
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  messages  RescueCommsMessage[]
+}
+
+model RescueCommsMessage {
+  id        String             @id @default(uuid())
+  text      String
+  channelId String
+  senderId  String
+  createdAt DateTime           @default(now())
+  channel   RescueCommsChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender    User               @relation("CommsMessageSender", fields: [senderId], references: [id])
+}
+
+model FleetAsset {
+  id           String          @id @default(uuid())
+  name         String
+  assetCode    String          @unique
+  type         FleetAssetType  @default(VEHICLE)
+  status       FleetAssetStatus @default(AVAILABLE)
+  location     String
+  latitude     Float?
+  longitude    Float?
+  assignedToId String?
+  assignedTo   User?           @relation("FleetAssignedTo", fields: [assignedToId], references: [id])
+  lastService  DateTime?
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model ActionReport {
+  id              String             @id @default(uuid())
+  reportCode      String             @unique @default(uuid())
+  missionId       String?
+  assignment      Assignment?        @relation(fields: [missionId], references: [id])
+  title           String
+  summary         String
+  hazardNotes     String?
+  totalRescued    Int                @default(0)
+  casualties      Int                @default(0)
+  animalsRescued  Int                @default(0)
+  assetsLost      Int                @default(0)
+  status          ReportStatus       @default(PENDING_REVIEW)
+  filedById       String
+  filedBy         User               @relation("ReportFiledBy", fields: [filedById], references: [id])
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+enum FleetAssetType {
+  VEHICLE
+  AQUATIC
+  AERIAL
+  HEAVY_TOOLS
+  MEDICAL
+  OTHER
+}
+
+enum FleetAssetStatus {
+  AVAILABLE
+  DEPLOYED
+  MAINTENANCE
+  DECOMMISSIONED
+}
+
+enum ReportStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
 }

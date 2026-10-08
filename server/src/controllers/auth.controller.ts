@@ -21,11 +21,9 @@ export const register = async (
   catch (error) {
     console.error(error);
 
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      error,
       message: error instanceof Error ? error.message : "Registration failed",
-      stack: error instanceof Error ? error.stack : null,
     });
   }
 };

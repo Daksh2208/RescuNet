@@ -26,6 +26,7 @@ export const me = async (
     res.json({
         success: true,
         user,
+        data: user,
     });
 
 };
