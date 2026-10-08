@@ -15,7 +15,8 @@ import {
   Bell,
   Users,
   Wrench,
-  ClipboardType
+  ClipboardType,
+  Home
 } from "lucide-react";
 
 export default function RescueLayout({
@@ -30,12 +31,14 @@ export default function RescueLayout({
     { name: "Dashboard", href: "/rescue", icon: LayoutDashboard },
     { name: "Active Missions", href: "/rescue/missions", icon: Truck },
     { name: "Dispatch Map", href: "/rescue/map", icon: Map },
+    { name: "Shelter Network", href: "/rescue/shelters", icon: Home },
     { name: "Volunteer Dispatch", href: "/rescue/dispatcher", icon: Users },
     { name: "Team Comms", href: "/rescue/comms", icon: MessageSquare },
     { name: "Action Reports", href: "/rescue/reports", icon: ClipboardType },
     { name: "Tactical SOPs", href: "/rescue/protocols", icon: ShieldAlert },
     { name: "Profile", href: "/rescue/profile", icon: User },
   ];
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex">

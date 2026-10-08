@@ -22,9 +22,11 @@ import {
   ShieldAlert,
   User,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Home
 } from "lucide-react";
 import Link from "next/link";
+
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -250,7 +252,7 @@ export default function RescueDashboard() {
       </div>
 
       {/* Quick Navigation Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link 
           href="/rescue/map"
           className="bg-white hover:bg-slate-50/80 rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-slate-300 transition flex items-center justify-between group"
@@ -260,11 +262,27 @@ export default function RescueDashboard() {
               <MapPin className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Global Tactical Map</h3>
-              <p className="text-xs text-slate-500">Live GPS routing & disaster zones</p>
+              <h3 className="font-bold text-slate-900 text-sm">Tactical Map</h3>
+              <p className="text-xs text-slate-500">Live GPS & hazards</p>
             </div>
           </div>
           <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" />
+        </Link>
+
+        <Link 
+          href="/rescue/shelters"
+          className="bg-white hover:bg-slate-50/80 rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-slate-300 transition flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
+              <Home className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Evac Shelters</h3>
+              <p className="text-xs text-slate-500">Live capacity & intake</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition" />
         </Link>
 
         <Link 
@@ -276,8 +294,8 @@ export default function RescueDashboard() {
               <Radio className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Tactical Comms Radio</h3>
-              <p className="text-xs text-slate-500">Coordinate with Command Center</p>
+              <h3 className="font-bold text-slate-900 text-sm">Team Comms</h3>
+              <p className="text-xs text-slate-500">Radio Command link</p>
             </div>
           </div>
           <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition" />
@@ -292,13 +310,14 @@ export default function RescueDashboard() {
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Standard SOP Protocols</h3>
-              <p className="text-xs text-slate-500">Human triage & extraction guides</p>
+              <h3 className="font-bold text-slate-900 text-sm">SOP Protocols</h3>
+              <p className="text-xs text-slate-500">Field triage guides</p>
             </div>
           </div>
           <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition" />
         </Link>
       </div>
+
 
       {/* ACTIVE ASSIGNED MISSIONS SECTION */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

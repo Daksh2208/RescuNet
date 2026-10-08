@@ -21,9 +21,11 @@ import {
   ExternalLink,
   ShieldAlert,
   User,
-  ClipboardType
+  ClipboardType,
+  Home
 } from "lucide-react";
 import Link from "next/link";
+
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -297,12 +299,21 @@ export default function RescueMissionsPage() {
                           <Navigation className="h-3.5 w-3.5 text-blue-600" /> GPS Route
                         </a>
 
+                        <Link
+                          href={`/rescue/shelters?nearLat=${mission.incident.latitude}&nearLng=${mission.incident.longitude}`}
+                          className="flex-1 bg-purple-50 border border-purple-200 text-purple-700 font-bold py-2.5 px-3 rounded-xl text-xs hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                          title="Locate nearest shelter to transfer victims"
+                        >
+                          <Home className="h-3.5 w-3.5 text-purple-600" /> Evac Hub
+                        </Link>
+
                         <button 
                           onClick={() => setSelectedMission(mission)}
                           className="flex-1 bg-slate-100 border border-slate-200 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-xs hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5"
                         >
                           <FileText className="h-3.5 w-3.5 text-slate-400" /> Briefing
                         </button>
+
 
                         {isPending ? (
                           <button 
@@ -507,7 +518,13 @@ export default function RescueMissionsPage() {
               )}
             </div>
 
-            <div className="flex gap-2 pt-3 border-t">
+            <div className="flex flex-wrap gap-2 pt-3 border-t">
+              <Link
+                href={`/rescue/shelters?nearLat=${selectedMission.incident.latitude}&nearLng=${selectedMission.incident.longitude}`}
+                className="px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-purple-200 transition-colors shadow-sm"
+              >
+                <Home className="h-3.5 w-3.5 text-purple-600" /> Transfer to Evac Shelter
+              </Link>
               {selectedMission.status === "PENDING" && (
                 <button 
                   onClick={() => handleAccept(selectedMission.id)}
@@ -531,6 +548,7 @@ export default function RescueMissionsPage() {
                 Close
               </button>
             </div>
+
           </div>
         </div>
       )}
