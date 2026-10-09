@@ -17,6 +17,9 @@ export const getPendingIncidents = async () => {
       longitude: true,
       address: true,
       createdAt: true,
+      target: true,
+      reporterName: true,
+      reporterPhone: true,
 
       reportedBy: {
         select: {
@@ -72,6 +75,9 @@ export const getVerifiedIncidents = async () => {
       address: true,
       createdAt: true,
       updatedAt: true,
+      target: true,
+      reporterName: true,
+      reporterPhone: true,
 
       reportedBy: {
         select: {

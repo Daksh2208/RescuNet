@@ -53,7 +53,12 @@ interface Incident {
     fullName: string;
     email: string;
     phone?: string;
-  };
+  } | null;
+
+  reporterName?: string | null;
+  reporterPhone?: string | null;
+  target?: "HUMAN" | "ANIMAL" | "BOTH";
+
   verifiedBy?: {
     id: string;
     fullName: string;
@@ -262,7 +267,11 @@ export default function AdminVerifyIncidentsPage() {
         incident.description.toLowerCase().includes(search) ||
         incident.disasterType.toLowerCase().includes(search) ||
         incident.address.toLowerCase().includes(search) ||
-        incident.reportedBy.fullName.toLowerCase().includes(search)
+        (
+          incident.reportedBy?.fullName ??
+          incident.reporterName ??
+          "Anonymous Reporter"
+        ).toLowerCase().includes(search)
     );
   }, [searchTerm, activeTab, incidents, verifiedIncidents]);
 
@@ -355,11 +364,10 @@ export default function AdminVerifyIncidentsPage() {
                 setActiveTab("unverified");
                 setSearchTerm("");
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                activeTab === "unverified"
-                  ? "bg-white text-purple-700 shadow-sm border border-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "unverified"
+                ? "bg-white text-purple-700 shadow-sm border border-slate-200"
+                : "text-slate-500 hover:text-slate-700"
+                }`}
             >
               Unverified SOS Queue ({incidents.length})
             </button>
@@ -369,11 +377,10 @@ export default function AdminVerifyIncidentsPage() {
                 setActiveTab("verified");
                 setSearchTerm("");
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                activeTab === "verified"
-                  ? "bg-white text-purple-700 shadow-sm border border-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "verified"
+                ? "bg-white text-purple-700 shadow-sm border border-slate-200"
+                : "text-slate-500 hover:text-slate-700"
+                }`}
             >
               Verified / Dispatched ({verifiedIncidents.length})
             </button>
@@ -443,7 +450,12 @@ export default function AdminVerifyIncidentsPage() {
                           <MapPin className="h-3.5 w-3.5 text-slate-400" />
                           {incident.address}
                         </span>
-                        <span>Reported by: <strong className="text-slate-700">{incident.reportedBy.fullName}</strong></span>
+                        <span>
+                          Reported by:{" "}
+                          <strong className="text-slate-700">
+                            {incident.reportedBy?.fullName ?? "Anonymous User"}
+                          </strong>
+                        </span>
                         <span>{formatDate(incident.createdAt)}</span>
                       </div>
 
@@ -562,7 +574,12 @@ export default function AdminVerifyIncidentsPage() {
                           <MapPin className="h-3.5 w-3.5 shrink-0" />
                           {incident.address} <ExternalLink className="h-3 w-3 ml-0.5" />
                         </a>
-                        <span>Reported by: <strong className="text-slate-700">{incident.reportedBy.fullName}</strong></span>
+                        <span>
+                          Reported by:{" "}
+                          <strong className="text-slate-700">
+                            {incident.reportedBy?.fullName ?? "Anonymous User"}
+                          </strong>
+                        </span>
                         {incident.verifiedBy && (
                           <span className="text-purple-700">Verified by: {incident.verifiedBy.fullName}</span>
                         )}
@@ -583,13 +600,12 @@ export default function AdminVerifyIncidentsPage() {
                                     <Phone className="h-3 w-3" /> {assignment.rescueTeam.phone || "No phone listed"}
                                   </p>
                                 </div>
-                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded uppercase ${
-                                  assignment.status === 'COMPLETED' 
-                                    ? 'bg-emerald-100 text-emerald-700' 
-                                    : assignment.status === 'ACCEPTED' 
-                                    ? 'bg-blue-100 text-blue-700' 
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded uppercase ${assignment.status === 'COMPLETED'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : assignment.status === 'ACCEPTED'
+                                    ? 'bg-blue-100 text-blue-700'
                                     : 'bg-yellow-100 text-yellow-700'
-                                }`}>
+                                  }`}>
                                   {assignment.status}
                                 </span>
                               </div>
@@ -645,7 +661,7 @@ export default function AdminVerifyIncidentsPage() {
                   <p className="text-xs text-slate-500">Incident Command Emergency Dispatch</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setDispatchModalIncident(null)}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
               >
@@ -688,16 +704,14 @@ export default function AdminVerifyIncidentsPage() {
                         <div
                           key={team.id}
                           onClick={() => setSelectedRescueTeamId(team.id)}
-                          className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                            isSelected
-                              ? "bg-purple-50 border-purple-500 ring-2 ring-purple-500/20"
-                              : "bg-white border-slate-200 hover:bg-slate-50"
-                          }`}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${isSelected
+                            ? "bg-purple-50 border-purple-500 ring-2 ring-purple-500/20"
+                            : "bg-white border-slate-200 hover:bg-slate-50"
+                            }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                              isSelected ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-700"
-                            }`}>
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs ${isSelected ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-700"
+                              }`}>
                               <User className="h-4 w-4" />
                             </div>
                             <div>
@@ -705,11 +719,10 @@ export default function AdminVerifyIncidentsPage() {
                               <p className="text-[11px] text-slate-500">{team.phone || team.email}</p>
                             </div>
                           </div>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            team.activeMissionsCount === 0 
-                              ? "bg-emerald-100 text-emerald-700" 
-                              : "bg-orange-100 text-orange-700"
-                          }`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${team.activeMissionsCount === 0
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-orange-100 text-orange-700"
+                            }`}>
                             {team.activeMissionsCount} Active {team.activeMissionsCount === 1 ? "Mission" : "Missions"}
                           </span>
                         </div>

@@ -3,7 +3,7 @@ import type { CreateIncidentDto } from "./incident.types.js";
 
 export const createIncident = async (
   data: CreateIncidentDto,
-  userId: string
+  userId?: string
 ) => {
 
   console.log("Service data:", data);
@@ -18,7 +18,15 @@ export const createIncident = async (
       latitude: data.latitude,
       longitude: data.longitude,
       address: data.address,
-      reportedById: userId,
+
+      // Registered citizen or anonymous visitor
+      reportedById: userId ?? null,
+
+       // Optional anonymous reporter details
+      reporterName: userId ? null : data.reporterName?.trim() || null,
+      reporterPhone: userId ? null : data.reporterPhone?.trim() || null,
+
+      target: data.target ?? "HUMAN",
     },
     include: {
       reportedBy: {

@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, MapPin, Camera, Send, PawPrint, Users } from "lucide-react";
 import Link from "next/link";
-import { reportIncident } from "@/lib/incident";
+import { reportIncident, reportPublicIncident } from "@/lib/incident";
 import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/upload";
 import { geocodeAddress } from "@/lib/geocode";
+import { getCurrentUser } from "@/lib/auth";
 
 export default function ReportEmergencyPage() {
   const [target, setTarget] = useState<"human" | "animal" | "both">("human");
@@ -27,6 +28,32 @@ export default function ReportEmergencyPage() {
 
   const router = useRouter();
 
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    getCurrentUser()
+      .then((currentUser) => {
+        if (active) setUser(currentUser);
+      })
+      .catch((error) => {
+        if (error.response?.status === 401) {
+          if (active) setUser(null);
+        } else {
+          console.error("Failed to check authentication:", error);
+        }
+      })
+      .finally(() => {
+        if (active) setAuthChecked(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -38,145 +65,118 @@ export default function ReportEmergencyPage() {
   };
 
 
-  const handleSubmit = async (
-  e: React.FormEvent
-) => {
+  //   const handleSubmit = async (
+  //   e: React.FormEvent
+  // ) => {
 
-  e.preventDefault();
+  //   e.preventDefault();
 
-  try {
+  //   try {
 
-    setLoading(true);
+  //     setLoading(true);
 
-    let imageUrl = "";
+  //     let imageUrl = "";
 
-    if (imageFile) {
+  //     if (imageFile) {
 
-      imageUrl = await uploadImage(imageFile);
+  //       imageUrl = await uploadImage(imageFile);
 
+  //     }
+
+  //     await reportIncident({
+
+  //       ...form,
+
+  //       imageUrl,
+
+  //     });
+
+  //     setForm({
+
+  //       title: "",
+  //       description: "",
+  //       disasterType: "",
+  //       severity: "MEDIUM",
+  //       latitude: 0,
+  //       longitude: 0,
+  //       address: "",
+
+  //     });
+
+  //     setImageFile(null);
+
+  //     router.push("/citizen/reports");
+
+  //   }
+  //   catch (err) {
+
+  //     console.error(err);
+
+  //     alert("Failed to report incident");
+
+  //   }
+  //   finally {
+
+  //     setLoading(false);
+
+  //   }
+
+  // };
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      let imageUrl = "";
+
+      if (imageFile) {
+        if (!user) {
+          alert("Please log in to upload an image. You can submit an emergency report without one.");
+          return;
+        }
+
+        imageUrl = await uploadImage(imageFile);
+      }
+
+      const payload = {
+        ...form,
+        imageUrl,
+      };
+
+      if (user) {
+        await reportIncident(payload);
+        router.push("/citizen/reports");
+      } else {
+        const response = await reportPublicIncident(payload);
+        const reportId = response.data.data.id;
+
+        setForm({
+          title: "",
+          description: "",
+          disasterType: "",
+          severity: "MEDIUM",
+          latitude: 0,
+          longitude: 0,
+          address: "",
+        });
+
+        setImageFile(null);
+
+        alert(
+          `Emergency reported successfully. Your report ID is ${reportId}`
+        );
+      }
+    } catch (err) {
+      console.error("Failed to submit emergency report:", err);
+      alert("Failed to report emergency. Please try again.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    await reportIncident({
-
-      ...form,
-
-      imageUrl,
-
-    });
-
-    setForm({
-
-      title: "",
-      description: "",
-      disasterType: "",
-      severity: "MEDIUM",
-      latitude: 0,
-      longitude: 0,
-      address: "",
-
-    });
-
-    setImageFile(null);
-
-    router.push("/citizen/reports");
-
-  }
-  catch (err) {
-
-    console.error(err);
-
-    alert("Failed to report incident");
-
-  }
-  finally {
-
-    setLoading(false);
-
-  }
-
-};
-
-
-// const handleSubmit = async (
-//   e: React.FormEvent
-// ) => {
-
-//   e.preventDefault();
-
-//   try {
-
-//     setLoading(true);
-
-//     // 1. Validate address
-//     if (!form.address.trim()) {
-//       alert("Please enter the incident location");
-//       return;
-//     }
-
-//     // 2. Convert address into latitude & longitude
-//     const location = await geocodeAddress(
-//       form.address
-//     );
-
-//     console.log("Geocoded location:", location);
-
-//     // 3. Upload image if selected
-//     let imageUrl = "";
-
-//     if (imageFile) {
-//       imageUrl = await uploadImage(imageFile);
-//     }
-
-//     // 4. Create incident with real coordinates
-//     const incidentData = {
-//       ...form,
-//       latitude: location.latitude,
-//       longitude: location.longitude,
-//       address: location.formattedAddress,
-//       imageUrl,
-//     };
-
-//     console.log(
-//       "Sending incident:",
-//       incidentData
-//     );
-
-//     // 5. Send to existing incident API
-//     await reportIncident(incidentData);
-
-//     alert("Incident reported successfully!");
-
-//     // 6. Reset form
-//     setForm({
-//       title: "",
-//       description: "",
-//       disasterType: "",
-//       severity: "MEDIUM",
-//       latitude: 0,
-//       longitude: 0,
-//       address: "",
-//     });
-
-//     setImageFile(null);
-
-//     // 7. Go to reports
-//     router.push("/citizen/reports");
-
-//   } catch (err) {
-
-//     console.error(err);
-
-//     alert(
-//       "Could not find this location. Please enter a more specific address."
-//     );
-
-//   } finally {
-
-//     setLoading(false);
-
-//   }
-
-// };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

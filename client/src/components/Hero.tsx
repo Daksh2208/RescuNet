@@ -34,7 +34,7 @@ export default function Hero() {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
           <Link
-            href="/register"
+            href="/emergency-report"
             className="w-full sm:w-auto px-8 py-4 rounded-full text-base font-bold bg-red-600 hover:bg-red-700 text-white shadow-md transition-all flex items-center justify-center gap-2 group"
           >
             Report Emergency

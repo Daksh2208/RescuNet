@@ -7,56 +7,61 @@ datasource db {
 }
 
 model User {
-  id                    String         @id @default(uuid())
+  id                    String               @id @default(uuid())
   fullName              String
-  email                 String         @unique
+  email                 String               @unique
   password              String
-  phone                 String         @unique
-  role                  UserRole       @default(CITIZEN)
-  isVerified            Boolean        @default(false)
-  isActive              Boolean        @default(true)
+  phone                 String               @unique
+  role                  UserRole             @default(CITIZEN)
+  isVerified            Boolean              @default(false)
+  isActive              Boolean              @default(true)
   emergencyContactName  String?
   emergencyContactPhone String?
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  assignedBy            Assignment[]   @relation("AssignedBy")
-  rescueAssignments     Assignment[]   @relation("RescueTeam")
-  reportedIncidents     Incident[]     @relation("ReportedBy")
-  verifiedIncidents     Incident[]     @relation("VerifiedBy")
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  assignedBy            Assignment[]         @relation("AssignedBy")
+  rescueAssignments     Assignment[]         @relation("RescueTeam")
+  reportedIncidents     Incident[]           @relation("ReportedBy")
+  verifiedIncidents     Incident[]           @relation("VerifiedBy")
   notifications         Notification[]
   refreshTokens         RefreshToken[]
-  reunificationReports  ReunificationPost[] @relation("ReunificationReportedBy")
-  reunificationFound    ReunificationPost[] @relation("ReunificationFoundBy")
+  reunificationReports  ReunificationPost[]  @relation("ReunificationReportedBy")
+  reunificationFound    ReunificationPost[]  @relation("ReunificationFoundBy")
   communityPosts        CommunityPost[]
-  claimedTasks          VolunteerTask[]     @relation("TaskClaimedBy")
-  fosterRequests        FosterRequest[]     @relation("FosterVolunteer")
-  createdFosterReqs     FosterRequest[]     @relation("FosterCreatedBy")
-  auditLogs AuditLog[]
-  commsMessages         RescueCommsMessage[]  @relation("CommsMessageSender")
-  fleetAssignments      FleetAsset[]          @relation("FleetAssignedTo")
-  actionReports         ActionReport[]        @relation("ReportFiledBy")
+  claimedTasks          VolunteerTask[]      @relation("TaskClaimedBy")
+  fosterRequests        FosterRequest[]      @relation("FosterVolunteer")
+  createdFosterReqs     FosterRequest[]      @relation("FosterCreatedBy")
+  auditLogs             AuditLog[]
+  commsMessages         RescueCommsMessage[] @relation("CommsMessageSender")
+  fleetAssignments      FleetAsset[]         @relation("FleetAssignedTo")
+  actionReports         ActionReport[]       @relation("ReportFiledBy")
 }
 
 model Incident {
-  id           String          @id @default(uuid())
-  title        String
-  description  String
-  disasterType DisasterType
-  severity     Severity
-  status       IncidentStatus  @default(PENDING)
-  latitude     Float
-  longitude    Float
-  address      String
-  reportedById String
-  verifiedById String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  aiAnalysis   AIAnalysis?
-  isAiProcessed Boolean @default(false)
-  assignments  Assignment[]
-  reportedBy   User            @relation("ReportedBy", fields: [reportedById], references: [id])
-  verifiedBy   User?           @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  images       IncidentImage[]
+  id            String          @id @default(uuid())
+  title         String
+  description   String
+  disasterType  DisasterType
+  severity      Severity
+  status        IncidentStatus  @default(PENDING)
+  latitude      Float
+  longitude     Float
+  address       String
+  reportedById  String?
+  verifiedById  String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  aiAnalysis    AIAnalysis?
+  isAiProcessed Boolean         @default(false)
+  assignments   Assignment[]
+  reportedBy    User?           @relation("ReportedBy", fields: [reportedById], references: [id])
+  verifiedBy    User?           @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  images        IncidentImage[]
+
+  reporterName  String?
+  reporterPhone String?
+
+  target IncidentTarget @default(HUMAN)
 }
 
 model IncidentImage {
@@ -83,19 +88,19 @@ model Assignment {
 }
 
 model Shelter {
-  id            String       @id @default(uuid())
-  name          String
-  type          ShelterType  @default(HUMAN)
-  address       String
-  latitude      Float
-  longitude     Float
-  capacity      Int
-  occupied      Int             @default(0)
-  contactNumber String
-  needs         String[]        @default([])
+  id             String          @id @default(uuid())
+  name           String
+  type           ShelterType     @default(HUMAN)
+  address        String
+  latitude       Float
+  longitude      Float
+  capacity       Int
+  occupied       Int             @default(0)
+  contactNumber  String
+  needs          String[]        @default([])
   fosterRequests FosterRequest[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Resource {
@@ -149,25 +154,25 @@ model RefreshToken {
 }
 
 model ReunificationPost {
-  id             String               @id @default(uuid())
-  type           ReunificationType
-  name           String
-  description    String?
-  age            String?
-  lastSeen       String
-  latitude       Float?
-  longitude      Float?
-  imageUrl       String?
-  status         ReunificationStatus  @default(MISSING)
+  id          String              @id @default(uuid())
+  type        ReunificationType
+  name        String
+  description String?
+  age         String?
+  lastSeen    String
+  latitude    Float?
+  longitude   Float?
+  imageUrl    String?
+  status      ReunificationStatus @default(MISSING)
 
-  reportedById   String
-  foundById      String?
+  reportedById String
+  foundById    String?
 
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  reportedBy     User                 @relation("ReunificationReportedBy", fields: [reportedById], references: [id])
-  foundBy        User?                @relation("ReunificationFoundBy", fields: [foundById], references: [id])
+  reportedBy User  @relation("ReunificationReportedBy", fields: [reportedById], references: [id])
+  foundBy    User? @relation("ReunificationFoundBy", fields: [foundById], references: [id])
 }
 
 model CommunityPost {
@@ -184,7 +189,7 @@ model CommunityPost {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {
@@ -272,22 +277,22 @@ model VolunteerTask {
 }
 
 model FosterRequest {
-  id                String        @id @default(uuid())
+  id                String       @id @default(uuid())
   petName           String
-  animalType        AnimalType    @default(DOG)
+  animalType        AnimalType   @default(DOG)
   breed             String?
   description       String
   location          String
-  isMedicalNeeds    Boolean       @default(false)
+  isMedicalNeeds    Boolean      @default(false)
   shelterId         String?
-  shelter           Shelter?      @relation(fields: [shelterId], references: [id])
-  status            FosterStatus  @default(OPEN)
+  shelter           Shelter?     @relation(fields: [shelterId], references: [id])
+  status            FosterStatus @default(OPEN)
   createdById       String
-  createdBy         User          @relation("FosterCreatedBy", fields: [createdById], references: [id])
+  createdBy         User         @relation("FosterCreatedBy", fields: [createdById], references: [id])
   fosterVolunteerId String?
-  fosterVolunteer   User?         @relation("FosterVolunteer", fields: [fosterVolunteerId], references: [id])
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  fosterVolunteer   User?        @relation("FosterVolunteer", fields: [fosterVolunteerId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
 
 enum VolunteerTaskType {
@@ -349,39 +354,39 @@ model RescueCommsMessage {
 }
 
 model FleetAsset {
-  id           String          @id @default(uuid())
+  id           String           @id @default(uuid())
   name         String
-  assetCode    String          @unique
-  type         FleetAssetType  @default(VEHICLE)
+  assetCode    String           @unique
+  type         FleetAssetType   @default(VEHICLE)
   status       FleetAssetStatus @default(AVAILABLE)
   location     String
   latitude     Float?
   longitude    Float?
   assignedToId String?
-  assignedTo   User?           @relation("FleetAssignedTo", fields: [assignedToId], references: [id])
+  assignedTo   User?            @relation("FleetAssignedTo", fields: [assignedToId], references: [id])
   lastService  DateTime?
   notes        String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }
 
 model ActionReport {
-  id              String             @id @default(uuid())
-  reportCode      String             @unique @default(uuid())
-  missionId       String?
-  assignment      Assignment?        @relation(fields: [missionId], references: [id])
-  title           String
-  summary         String
-  hazardNotes     String?
-  totalRescued    Int                @default(0)
-  casualties      Int                @default(0)
-  animalsRescued  Int                @default(0)
-  assetsLost      Int                @default(0)
-  status          ReportStatus       @default(PENDING_REVIEW)
-  filedById       String
-  filedBy         User               @relation("ReportFiledBy", fields: [filedById], references: [id])
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  id             String       @id @default(uuid())
+  reportCode     String       @unique @default(uuid())
+  missionId      String?
+  assignment     Assignment?  @relation(fields: [missionId], references: [id])
+  title          String
+  summary        String
+  hazardNotes    String?
+  totalRescued   Int          @default(0)
+  casualties     Int          @default(0)
+  animalsRescued Int          @default(0)
+  assetsLost     Int          @default(0)
+  status         ReportStatus @default(PENDING_REVIEW)
+  filedById      String
+  filedBy        User         @relation("ReportFiledBy", fields: [filedById], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 enum FleetAssetType {
@@ -404,4 +409,10 @@ enum ReportStatus {
   PENDING_REVIEW
   APPROVED
   REJECTED
+}
+
+enum IncidentTarget {
+  HUMAN
+  ANIMAL
+  BOTH
 }
