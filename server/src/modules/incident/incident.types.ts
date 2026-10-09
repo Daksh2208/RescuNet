@@ -12,4 +12,8 @@ export interface CreateIncidentDto {
   longitude: number;
   address: string;
   imageUrl?:string;
+  target?: "HUMAN" | "ANIMAL" | "BOTH";
+  reporterName?: string;
+  reporterPhone?: string;
+
 }

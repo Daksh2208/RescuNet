@@ -1,9 +1,10 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type { AuthRequest } from "../../middleware/auth.middleware.js";
 import { createIncident, getIncidentById, getMyIncidents } from "./incident.service.js";
 import {
   getRadarIncidents as getRadarIncidentsService,
 } from "./incident.service.js";
+
 
 export const reportIncident = async (
   req: AuthRequest,
@@ -120,6 +121,34 @@ export const getRadarIncidents = async (
     return res.status(500).json({
       success: false,
       message: "Failed to fetch radar incidents",
+    });
+  }
+};
+
+
+export const reportPublicIncident = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const incident = await createIncident(req.body, undefined);
+
+    return res.status(201).json({
+      success: true,
+      message: "Emergency reported successfully",
+      data: {
+        id: incident.id,
+        title: incident.title,
+        status: incident.status,
+        createdAt: incident.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Public incident report failed:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to report emergency",
     });
   }
 };
