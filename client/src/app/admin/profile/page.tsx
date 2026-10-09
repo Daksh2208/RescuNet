@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  User,
   ShieldAlert,
   LogOut,
   CheckCircle2,
@@ -212,13 +211,13 @@ export default function ProfilePage() {
             <div className="w-full mt-6 space-y-4">
 
               {/* ID */}
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+              <div className="flex flex-col items-start py-2 border-b border-slate-100 gap-1">
 
                 <span className="text-sm text-slate-500">
                   ID
                 </span>
 
-                <span className="text-xs font-bold text-slate-900 font-mono truncate max-w-[180px]">
+                <span className="w-full text-left text-xs font-bold text-slate-900 font-mono break-all">
                   {profile.id}
                 </span>
 
@@ -351,65 +350,6 @@ export default function ProfilePage() {
                 >
                   Change Password
                 </button>
-
-              </div>
-
-            </div>
-          </div>
-
-          {/* Account Information */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
-
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                <User className="h-5 w-5 text-purple-600" />
-                Account Information
-              </h3>
-
-            </div>
-
-            <div className="p-6">
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-                <div className="bg-slate-50 rounded-xl p-4">
-
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Account Role
-                  </p>
-
-                  <p className="text-sm font-bold text-slate-900 mt-1">
-                    {profile.role}
-                  </p>
-
-                </div>
-
-                <div className="bg-slate-50 rounded-xl p-4">
-
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Account Status
-                  </p>
-
-                  <p className="text-sm font-bold text-green-600 mt-1">
-                    {profile.isActive
-                      ? "Active"
-                      : "Inactive"}
-                  </p>
-
-                </div>
-
-                <div className="bg-slate-50 rounded-xl p-4 sm:col-span-2">
-
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Account ID
-                  </p>
-
-                  <p className="text-sm font-mono font-bold text-slate-900 mt-1 break-all">
-                    {profile.id}
-                  </p>
-
-                </div>
 
               </div>
 

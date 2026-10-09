@@ -11,8 +11,8 @@ import {
   ChevronDown, 
   ChevronUp, 
   Crosshair, 
-  Loader2, 
-  AlertTriangle 
+  Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -54,10 +54,56 @@ const defaultProtocols: Protocol[] = [
     before: ["Assess animal body language and prepare protective bite gauntlets"],
     during: ["Do not make sudden movements or maintain aggressive eye contact", "Use slip-leads or catchpoles only as a last resort", "Immediately transfer secured animals to dark, quiet transport crates"],
     after: ["Log microchips or physical characteristics and register in Reunification system"]
+  },
+  {
+    id: "proto-fire",
+    disasterType: "FIRE",
+    title: "Fireground Rescue & Evacuation SOP",
+    description: "Coordinate fireground rescue and evacuation with the responsible fire service and Incident Command. Entry into hazardous areas is restricted to trained, authorized personnel.",
+    before: [
+      "Confirm incident command, assignment, communications, evacuation routes, and accountability procedures before deployment.",
+      "Conduct a safe exterior size-up and identify visible hazards, access limitations, and potential exposure risks.",
+      "Wear task-appropriate PPE; interior operations require the required training, approved respiratory protection, and an established rescue and accountability plan.",
+      "Coordinate utility isolation and hazard-zone boundaries with the fire service; do not operate unfamiliar building systems."
+    ],
+    during: [
+      "Do not enter an IDLH, smoke-filled, structurally compromised, or otherwise unsafe area without authorization, required training, PPE, and a coordinated rescue plan.",
+      "Maintain crew integrity, communications, air-supply monitoring where applicable, and personnel accountability under agency procedure.",
+      "Prioritize life safety, communicate changing conditions immediately, and withdraw when ordered or when conditions exceed the team's capability.",
+      "Keep access routes clear and coordinate victim transfer to medical teams at a designated safe area."
+    ],
+    after: [
+      "Account for all personnel and report missing, injured, or exposed responders immediately.",
+      "Transfer patients to qualified medical personnel and record rescue locations, hazards, and actions taken.",
+      "Follow agency decontamination, equipment inspection, and incident debrief procedures before returning to service."
+    ]
+  },
+  {
+    id: "proto-cyclone",
+    disasterType: "CYCLONE",
+    title: "Cyclone Response & Rescue SOP",
+    description: "Plan and conduct rescue support around official cyclone warnings, wind impacts, storm surge, flooding, and secondary hazards.",
+    before: [
+      "Monitor official meteorological and emergency-management alerts; confirm activation level, assignments, communications, and check-in schedule.",
+      "Stage personnel, vehicles, fuel, medical supplies, and communications equipment outside forecast storm-surge and flood zones.",
+      "Identify safe shelters, evacuation routes, access constraints, and fallback communications with local Incident Command.",
+      "Secure equipment and suspend movement when wind, visibility, flooding, or official instructions make travel unsafe."
+    ],
+    during: [
+      "Do not deploy into dangerous wind, storm-surge, flood, or lightning conditions; follow evacuation and shelter orders from Incident Command.",
+      "Never walk or drive through floodwater; avoid downed power lines, damaged structures, and unstable trees.",
+      "Conduct rescue operations only when conditions are assessed safe, authorized, and within the team's training and equipment capability.",
+      "Maintain team accountability and location check-ins; report blocked routes, hazards, and urgent life-safety needs through established channels."
+    ],
+    after: [
+      "Wait for an official all-clear and route assessment before leaving shelter or staging areas.",
+      "Perform a hazard assessment before approaching damaged structures, floodwater, or downed utilities; request specialist support where needed.",
+      "Account for personnel, document assignments and incidents, hand over patients, and report resource needs to Incident Command."
+    ]
   }
 ];
 
-const disasterIcons: Record<string, any> = {
+const disasterIcons: Record<string, LucideIcon> = {
   FLOOD: Waves,
   EARTHQUAKE: Mountain,
   FIRE: Flame,
@@ -69,7 +115,6 @@ const disasterIcons: Record<string, any> = {
 export default function RescueProtocolsPage() {
   const [protocols, setProtocols] = useState<Protocol[]>(defaultProtocols);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("ALL");
 
@@ -77,15 +122,22 @@ export default function RescueProtocolsPage() {
     const fetchProtocols = async () => {
       try {
         setLoading(true);
-        setError("");
         const res = await api.get("/rescue/protocols");
         if (res.data.data && res.data.data.length > 0) {
-          setProtocols(res.data.data);
+          const serverProtocols: Protocol[] = res.data.data;
+          const missingHazardProtocols = defaultProtocols.filter(
+            (fallback) =>
+              ["FIRE", "CYCLONE"].includes(fallback.disasterType) &&
+              !serverProtocols.some(
+                (protocol) => protocol.disasterType === fallback.disasterType
+              )
+          );
+          setProtocols([...serverProtocols, ...missingHazardProtocols]);
         } else {
           // Keep default SOPs
           setProtocols(defaultProtocols);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to load protocols from backend, using standard SOPs:", err);
         setProtocols(defaultProtocols);
       } finally {

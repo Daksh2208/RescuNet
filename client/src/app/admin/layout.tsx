@@ -289,10 +289,12 @@ export default function AdminLayout({
           <div className="flex items-center gap-4">
 
             <Link
-              href="/admin/profile"
+              href="/admin/notifications"
               className="text-slate-400 hover:text-purple-600"
+              title="Notifications"
+              aria-label="Notifications"
             >
-              <User className="h-6 w-6" />
+              <Bell className="h-6 w-6" />
             </Link>
 
             <button
@@ -365,7 +367,6 @@ export default function AdminLayout({
 
         {/* Desktop Topbar */}
         <header className="hidden md:flex h-20 bg-white border-b border-slate-200 items-center justify-between px-8 sticky top-0 z-30 shadow-sm">
-
           <h1 className="text-xl font-bold text-slate-900">
             {currentPage}
           </h1>
@@ -374,49 +375,13 @@ export default function AdminLayout({
 
             {/* Notifications */}
             <Link
-              href="/admin/profile"
+              href="/admin/notifications"
               className="text-slate-400 hover:text-purple-600 relative transition-colors"
               title="Notifications"
+              aria-label="Notifications"
             >
               <Bell className="h-6 w-6" />
             </Link>
-
-            {/* Profile */}
-            <Link
-              href="/admin/profile"
-              className="flex items-center gap-3 pl-5 border-l border-slate-200"
-            >
-              <div className="h-9 w-9 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm">
-                {loadingUser ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  initials
-                )}
-              </div>
-
-              <div className="text-left">
-                <p className="text-sm font-bold text-slate-900">
-                  {userData?.fullName || "Admin"}
-                </p>
-
-                <p className="text-[10px] font-semibold text-purple-600 uppercase tracking-wider">
-                  {userData?.role || "ADMIN"}
-                </p>
-              </div>
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="text-slate-400 hover:text-red-600 transition-colors"
-              title="Sign out"
-            >
-              {loggingOut ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <LogOut className="h-5 w-5" />
-              )}
-            </button>
           </div>
         </header>
 

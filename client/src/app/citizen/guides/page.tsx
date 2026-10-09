@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Info, BookOpen, Wind, Flame, Waves, Activity, ArrowRight, PawPrint } from "lucide-react";
+import { BookOpen, Wind, Flame, Waves, Activity, PawPrint, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 
 export default function SafetyGuidesPage() {
@@ -31,6 +31,7 @@ export default function SafetyGuidesPage() {
       icon: Waves,
       color: "text-blue-600",
       bg: "bg-blue-50",
+      border: "border-blue-200",
       badge: "Water"
     },
     {
@@ -53,6 +54,7 @@ export default function SafetyGuidesPage() {
       icon: Activity,
       color: "text-purple-600",
       bg: "bg-purple-50",
+      border: "border-purple-200",
       badge: "Seismic"
     },
     {
@@ -74,6 +76,7 @@ export default function SafetyGuidesPage() {
       icon: Flame,
       color: "text-red-600",
       bg: "bg-red-50",
+      border: "border-red-200",
       badge: "Fire"
     },
     {
@@ -87,7 +90,7 @@ export default function SafetyGuidesPage() {
           <br />
           <p><strong>During the Cyclone:</strong></p>
           <p>• Retreat to a safe indoor room (preferably windowless, on the lowest floor) with your 72-hour survival kit.</p>
-          <p>• Do NOT leave the safe room when the 'eye' of the cyclone passes over. The calm is deceptive, and winds will violently return from the opposite direction.</p>
+          <p>• Do NOT leave the safe room when the &apos;eye&apos; of the cyclone passes over. The calm is deceptive, and winds will violently return from the opposite direction.</p>
           <br />
           <p><strong>Health & Safety (WHO):</strong></p>
           <p>• Stay clear of fallen power lines and report them immediately.</p>
@@ -97,6 +100,7 @@ export default function SafetyGuidesPage() {
       icon: Wind,
       color: "text-teal-600",
       bg: "bg-teal-50",
+      border: "border-teal-200",
       badge: "Weather"
     }
   ];
@@ -138,44 +142,63 @@ export default function SafetyGuidesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {guides.map((guide, i) => (
           <div
             key={i}
-            onClick={() => setExpandedGuide(expandedGuide === i ? null : i)}
-            className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col"
+            className={`bg-white rounded-2xl border ${guide.border} p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col`}
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${guide.bg} ${guide.color}`}>
+            <div className={`absolute top-0 right-0 w-24 h-24 ${guide.bg} rounded-bl-full -mr-8 -mt-8`} />
+
+            <div className="relative z-10 flex items-start gap-4 mb-4">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border ${guide.border} bg-white shadow-sm ${guide.color}`}>
                 <guide.icon className="h-6 w-6" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                {guide.badge}
-              </span>
+              <div>
+                <span className="inline-block text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-3 py-1 rounded-full mb-2">
+                  {guide.badge}
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">{guide.title}</h3>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">{guide.title}</h3>
-            <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+
+            <p className="relative z-10 text-sm text-slate-600 leading-relaxed">
               {guide.description}
             </p>
 
-            {expandedGuide === i ? (
-              <div className="mt-2 pt-4 border-t border-slate-100 text-sm text-slate-800 space-y-2 whitespace-pre-line animate-fade-in-up">
+            {expandedGuide === i && (
+              <div
+                id={`citizen-guide-${i}`}
+                className="relative z-10 mt-4 pt-4 border-t border-slate-100 text-sm text-slate-800 space-y-2 leading-relaxed"
+              >
                 {guide.content}
               </div>
-            ) : (
-              <div className={`mt-auto flex items-center text-sm font-bold ${guide.color}`}>
-                Read Full Guide <ArrowRight className="h-4 w-4 ml-1" />
-              </div>
             )}
+
+            <div className="relative z-10 mt-auto pt-6">
+              <button
+                type="button"
+                onClick={() => setExpandedGuide(expandedGuide === i ? null : i)}
+                aria-expanded={expandedGuide === i}
+                aria-controls={`citizen-guide-${i}`}
+                className={`text-sm font-bold flex items-center gap-2 ${guide.color} hover:opacity-80 transition-opacity`}
+              >
+                {expandedGuide === i ? (
+                  <>Close Guide <ChevronUp className="h-4 w-4" /></>
+                ) : (
+                  <>Read Full Guide <ChevronDown className="h-4 w-4" /></>
+                )}
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
       <div className="bg-slate-900 rounded-2xl p-6 text-white text-center mt-8 shadow-md">
         <PawPrint className="h-8 w-8 text-orange-400 mx-auto mb-3" />
-        <h3 className="text-lg font-bold mb-2">Don't Forget Your Pets</h3>
+        <h3 className="text-lg font-bold mb-2">Don&apos;t Forget Your Pets</h3>
         <p className="text-slate-400 text-sm max-w-2xl mx-auto">
-          Animals sense disasters before we do and may try to hide. Always keep a sturdy carrier or leash accessible, and ensure your pet's ID tags and microchip information are up to date.
+          Animals sense disasters before we do and may try to hide. Always keep a sturdy carrier or leash accessible, and ensure your pet&apos;s ID tags and microchip information are up to date.
         </p>
       </div>
     </div>

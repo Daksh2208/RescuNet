@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  User,
   Phone,
   Mail,
   MapPin,
+  CalendarDays,
   Bell,
   Shield,
   LogOut,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import api from "@/lib/api";
 import { setAccessToken } from "@/lib/token";
 
@@ -102,7 +103,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             My Profile
@@ -112,19 +113,28 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <button
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="text-red-600 hover:bg-red-50 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
-        >
-          {loggingOut ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <LogOut className="h-4 w-4" />
-          )}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Link
+            href="/citizen"
+            className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center"
+          >
+            Back to Dashboard
+          </Link>
 
-          {loggingOut ? "Signing Out..." : "Sign Out"}
-        </button>
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="text-red-600 hover:bg-red-50 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            {loggingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+
+            {loggingOut ? "Signing Out..." : "Sign Out"}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -144,64 +154,59 @@ export default function ProfilePage() {
               <CheckCircle2 className="h-3.5 w-3.5" />
               {userData.isVerified ? "Account Verified" : "Verification Pending"}
             </div>
-          </div>
 
-          {/* Contact Info */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-900 mb-2 border-b border-slate-100 pb-2">
-              Contact Information
-            </h3>
-
-            <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 text-slate-400 mt-0.5" />
-
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Phone
-                </p>
-
-                <p className="text-sm font-medium text-slate-900 truncate">
-                  {userData.phone || "Not provided"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 text-slate-400 mt-0.5" />
-
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Email
-                </p>
-
-                <p className="text-sm font-medium text-slate-900 truncate">
-                  {userData.email}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-slate-400 mt-0.5" />
-
-              <div>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Account Role
-                </p>
-
-                <p className="text-sm font-medium text-slate-900">
+            <div className="w-full mt-6 space-y-4 text-left">
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5" />
+                  Role
+                </span>
+                <span className="text-xs font-semibold text-slate-700">
                   {userData.role}
-                </p>
+                </span>
               </div>
-            </div>
 
-            <div className="pt-2 border-t border-slate-100">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Member Since
-              </p>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5" />
+                  Email
+                </span>
+                <span className="text-xs font-semibold text-slate-700 break-all text-right">
+                  {userData.email}
+                </span>
+              </div>
 
-              <p className="text-sm font-medium text-slate-900 mt-1">
-                {joinedDate}
-              </p>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <Phone className="h-3.5 w-3.5" />
+                  Phone
+                </span>
+                <span className="text-xs font-semibold text-slate-700">
+                  {userData.phone || "Not provided"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  Joined
+                </span>
+                <span className="text-xs font-semibold text-slate-700">
+                  {joinedDate}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 gap-4">
+                <span className="text-sm text-slate-500">Status</span>
+                <span
+                  className={`text-sm font-bold flex items-center gap-1 ${
+                    userData.isActive ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  {userData.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -286,31 +291,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Account Status */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-bold text-slate-900 mb-4">
-              Account Status
-            </h3>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">
-                Account status
-              </span>
-
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  userData.isActive
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                {userData.isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 }
-

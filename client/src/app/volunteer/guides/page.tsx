@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, ShieldAlert, HeartPulse, HardHat, FileCheck2, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, ShieldAlert, HeartPulse, HardHat, FileCheck2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -111,7 +111,7 @@ export default function VolunteerGuidelinesPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {guidelines.map((guide) => {
           const isExpanded = expandedId === guide.id;
           return (
@@ -176,7 +176,14 @@ export default function VolunteerGuidelinesPage() {
                 <p className="text-xs text-slate-500">Required reading for logistics team</p>
               </div>
             </div>
-            <button className="text-xs font-bold bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50">View PDF</button>
+            <a
+              href="/evacuation-shelter-setup-checklist.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50"
+            >
+              View PDF
+            </a>
           </li>
           
           <li className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors cursor-pointer">
@@ -189,7 +196,14 @@ export default function VolunteerGuidelinesPage() {
                 <p className="text-xs text-slate-500">Protocols for scared or aggressive pets</p>
               </div>
             </div>
-            <button className="text-xs font-bold bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50">View PDF</button>
+            <a
+              href="/animal-handling-in-crises-checklist.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50"
+            >
+              View PDF
+            </a>
           </li>
         </ul>
       </div>

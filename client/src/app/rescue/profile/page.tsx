@@ -1,7 +1,7 @@
 "use client";
 
 import { 
-  User, 
+  CalendarDays,
   Phone, 
   Mail, 
   MapPin, 
@@ -27,7 +27,7 @@ type UserProfile = {
   phone?: string;
   role: string;
   isVerified?: boolean;
-  isActive?: boolean;
+  isActive: boolean;
   createdAt: string;
 };
 
@@ -127,7 +127,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Truck className="h-6 w-6 text-blue-600" />
@@ -135,17 +135,17 @@ export default function ProfilePage() {
           </h1>
           <p className="text-slate-500 text-sm mt-1">Operational configuration and tactical identity settings</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Link 
             href="/rescue"
-            className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm"
+            className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center"
           >
             Back to Dashboard
           </Link>
           <button 
             onClick={handleLogout}
             disabled={loggingOut}
-            className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 border border-red-200 shadow-sm disabled:opacity-50"
+            className="text-red-600 hover:bg-red-50 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
           >
             {loggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
             {loggingOut ? "Signing Out..." : "Sign Out"}
@@ -156,58 +156,69 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Profile Card */}
-        <div className="md:col-span-1 space-y-6">
+        <div className="md:col-span-1">
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col items-center text-center">
             <div className="h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 border border-blue-200 shadow-sm text-2xl font-extrabold">
               {initials}
             </div>
             <h2 className="text-xl font-bold text-slate-900">{userData.fullName}</h2>
-            <p className="text-xs text-slate-500 mt-0.5">{userData.email}</p>
-            <div className="flex items-center gap-1 mt-3 text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Cleared for Field Dispatch
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-900 mb-2 border-b border-slate-100 pb-2 text-sm uppercase tracking-wider text-slate-400">
-              Operational Credentials
-            </h3>
-            
-            <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Assigned Role</p>
-                <p className="text-sm font-bold text-blue-700">{userData.role}</p>
-              </div>
+            <div className="flex items-center gap-1 mt-2 text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+              <Shield className="h-3.5 w-3.5" />
+              {userData.role}
             </div>
 
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Email Communication</p>
-                <p className="text-sm font-medium text-slate-900 truncate">{userData.email}</p>
+            <div className="w-full mt-6 space-y-4 text-left">
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5" />
+                  Email
+                </span>
+                <span className="text-xs font-semibold text-slate-700 break-all text-right">
+                  {userData.email}
+                </span>
               </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Emergency Contact / Radio</p>
-                <p className="text-sm font-medium text-slate-900">{userData.phone || "+91 9876543210"}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-slate-400 mt-0.5" />
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Base Sector</p>
-                <p className="text-sm font-medium text-slate-900">Command HQ Sector 4</p>
-              </div>
-            </div>
 
-            <div className="pt-2 border-t border-slate-100">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Commissioned Date</p>
-              <p className="text-sm font-medium text-slate-900 mt-0.5">{memberSince}</p>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <Phone className="h-3.5 w-3.5" />
+                  Phone
+                </span>
+                <span className="text-xs font-semibold text-slate-700">
+                  {userData.phone || "Not provided"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Base Sector
+                </span>
+                <span className="text-xs font-semibold text-slate-700 text-right">
+                  Command HQ Sector 4
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-slate-100 gap-4">
+                <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  Joined
+                </span>
+                <span className="text-xs font-semibold text-slate-700 text-right">
+                  {memberSince}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 gap-4">
+                <span className="text-sm text-slate-500">Status</span>
+                <span
+                  className={`text-sm font-bold flex items-center gap-1 ${
+                    userData.isActive ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  {userData.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
