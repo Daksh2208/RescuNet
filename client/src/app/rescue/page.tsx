@@ -286,16 +286,16 @@ export default function RescueDashboard() {
         </Link>
 
         <Link 
-          href="/rescue/comms"
+          href="/rescue/dispatcher"
           className="bg-white hover:bg-slate-50/80 rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-slate-300 transition flex items-center justify-between group"
         >
           <div className="flex items-center gap-3.5">
             <div className="h-11 w-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-              <Radio className="h-5 w-5" />
+              <Users className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Team Comms</h3>
-              <p className="text-xs text-slate-500">Radio Command link</p>
+              <h3 className="font-bold text-slate-900 text-sm">Volunteer Dispatch</h3>
+              <p className="text-xs text-slate-500">Deploy field tasks</p>
             </div>
           </div>
           <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition" />

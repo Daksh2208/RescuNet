@@ -77,12 +77,19 @@ export const claimTaskController = async (req: AuthRequest, res: Response) => {
 export const updateStatusController = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
-    const updatedTask = await updateTaskStatus(id as string, status);
+    const { status, completionNotes } = req.body;
+    const userId = req.user?.id;
+    const role = req.user?.role;
+
+    const updatedTask = await updateTaskStatus(id as string, status, {
+      userId,
+      role,
+      completionNotes,
+    });
 
     return res.status(200).json({
       success: true,
-      message: "Task status updated",
+      message: "Task status updated successfully",
       task: updatedTask,
     });
   } catch (error: any) {

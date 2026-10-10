@@ -271,7 +271,10 @@ model VolunteerTask {
   claimedById String?
   claimedBy   User?             @relation("TaskClaimedBy", fields: [claimedById], references: [id])
   claimedAt   DateTime?
-  completedAt DateTime?
+  completedAt     DateTime?
+  completionNotes String?
+  contactPerson   String?
+  contactPhone    String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }

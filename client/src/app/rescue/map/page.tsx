@@ -798,12 +798,6 @@ function RescueMapContent() {
               {/* Action Toolbar */}
               <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex flex-wrap gap-2 justify-end">
                 <Link
-                  href="/rescue/comms"
-                  className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors flex items-center gap-1.5"
-                >
-                  <Radio className="h-3.5 w-3.5 text-blue-600" /> Tactical Comms
-                </Link>
-                <Link
                   href="/rescue/dispatcher"
                   className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors flex items-center gap-1.5"
                 >

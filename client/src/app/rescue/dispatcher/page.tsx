@@ -14,6 +14,11 @@ type DispatchedTask = {
   status: string;
   location: string;
   createdAt: string;
+  claimedAt?: string;
+  completedAt?: string;
+  completionNotes?: string;
+  contactPerson?: string;
+  contactPhone?: string;
   claimedBy?: {
     id: string;
     fullName: string;
@@ -33,6 +38,8 @@ export default function VolunteerDispatcherPage() {
   const [type, setType] = useState("SUPPLY_DELIVERY");
   const [priority, setPriority] = useState("MEDIUM");
   const [description, setDescription] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
 
   const fetchTasks = async () => {
     try {
@@ -67,10 +74,14 @@ export default function VolunteerDispatcherPage() {
         type,
         priority,
         description: description.trim(),
+        contactPerson: contactPerson.trim() || undefined,
+        contactPhone: contactPhone.trim() || undefined,
       });
       setTitle("");
       setLocation("");
       setDescription("");
+      setContactPerson("");
+      setContactPhone("");
       await fetchTasks();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to broadcast task");
@@ -97,7 +108,7 @@ export default function VolunteerDispatcherPage() {
             <Users className="h-6 w-6 text-blue-600" />
             Volunteer Task Dispatcher
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Create and broadcast operational tasks to the civilian volunteer network</p>
+          <p className="text-slate-500 text-sm mt-1">Create, broadcast, and monitor real-time volunteer fulfillment in disaster zones</p>
         </div>
         <Link 
           href="/rescue"
@@ -135,7 +146,7 @@ export default function VolunteerDispatcherPage() {
                   type="text" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. Central High School" 
+                  placeholder="e.g. Central High School Relief Camp" 
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" 
                   required
                 />
@@ -169,6 +180,28 @@ export default function VolunteerDispatcherPage() {
                   </select>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contact Person (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={contactPerson}
+                    onChange={(e) => setContactPerson(e.target.value)}
+                    placeholder="e.g. Camp Head Mark" 
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contact Phone (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder="e.g. +1 555-0199" 
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" 
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Description / Instructions</label>
                 <textarea 
@@ -176,7 +209,7 @@ export default function VolunteerDispatcherPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Detailed instructions for the volunteer..." 
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" 
                   required
                 />
               </div>
@@ -228,62 +261,103 @@ export default function VolunteerDispatcherPage() {
                 </div>
               ) : (
                 tasks.map((task) => (
-                  <div key={task.id} className="p-5 border border-slate-200 rounded-xl hover:shadow-sm transition-shadow flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="flex gap-4">
-                      <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
-                        {task.priority === 'HIGH' || task.priority === 'CRITICAL' ? (
-                          <AlertCircle className="h-5 w-5 text-orange-500" />
-                        ) : (
-                          <Package className="h-5 w-5" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">{task.title}</h3>
-                        <p className="text-sm text-slate-500 mt-0.5">{task.location}</p>
-                        <p className="text-xs text-slate-600 mt-1">{task.description}</p>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600">
-                            {task.type.replace("_", " ")}
-                          </span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                              ? 'bg-orange-100 text-orange-700' 
-                              : 'bg-blue-100 text-blue-700'
-                          }`}>
-                            {task.priority}
-                          </span>
+                  <div key={task.id} className="p-5 border border-slate-200 rounded-xl hover:shadow-sm transition-shadow flex flex-col gap-3">
+                    <div className="flex flex-col sm:flex-row justify-between gap-4">
+                      <div className="flex gap-4">
+                        <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                          {task.priority === 'HIGH' || task.priority === 'CRITICAL' ? (
+                            <AlertCircle className="h-5 w-5 text-orange-500" />
+                          ) : (
+                            <Package className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900">{task.title}</h3>
+                          <p className="text-sm text-slate-500 mt-0.5">{task.location}</p>
+                          <p className="text-xs text-slate-600 mt-1">{task.description}</p>
+                          
+                          {(task.contactPerson || task.contactPhone) && (
+                            <p className="text-xs font-semibold text-slate-500 mt-1.5 flex items-center gap-1.5">
+                              <span>Contact: {task.contactPerson || "On-site Rep"}</span>
+                              {task.contactPhone && (
+                                <a href={`tel:${task.contactPhone}`} className="text-blue-600 hover:underline">
+                                  ({task.contactPhone})
+                                </a>
+                              )}
+                            </p>
+                          )}
+
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600">
+                              {task.type.replace("_", " ")}
+                            </span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                              task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                                ? 'bg-orange-100 text-orange-700' 
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {task.priority}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-start sm:items-end justify-center shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100">
-                      {task.status === "CLAIMED" ? (
-                        <>
-                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md mb-1">
-                            CLAIMED
+                      
+                      <div className="flex flex-col items-start sm:items-end justify-start shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                        {task.status === "COMPLETED" ? (
+                          <>
+                            <span className="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-1 rounded-md mb-1 flex items-center gap-1">
+                              ✓ FULFILLED
+                            </span>
+                            <span className="text-xs font-medium text-slate-500">
+                              by {task.claimedBy?.fullName || "Volunteer"}
+                            </span>
+                          </>
+                        ) : task.status === "IN_PROGRESS" ? (
+                          <>
+                            <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-md mb-1 animate-pulse">
+                              EN ROUTE / IN PROGRESS
+                            </span>
+                            <span className="text-xs font-medium text-slate-500">
+                              by {task.claimedBy?.fullName || "Volunteer"}
+                            </span>
+                          </>
+                        ) : task.status === "CLAIMED" ? (
+                          <>
+                            <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-md mb-1">
+                              CLAIMED
+                            </span>
+                            <span className="text-xs font-medium text-slate-500">
+                              by {task.claimedBy?.fullName || "Volunteer"}
+                            </span>
+                          </>
+                        ) : task.status === "CANCELLED" ? (
+                          <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-md">
+                            CANCELLED
                           </span>
-                          <span className="text-xs font-medium text-slate-500">
-                            by {task.claimedBy?.fullName || "Volunteer"}
+                        ) : (
+                          <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                            OPEN (BROADCASTING)
                           </span>
-                        </>
-                      ) : task.status === "CANCELLED" ? (
-                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-md">
-                          CANCELLED
-                        </span>
-                      ) : (
-                        <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                          OPEN (BROADCASTING)
-                        </span>
-                      )}
-                      {task.status !== "CANCELLED" && task.status !== "COMPLETED" && (
-                        <button 
-                          onClick={() => handleCancelTask(task.id)}
-                          className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors mt-3"
-                        >
-                          Cancel Task
-                        </button>
-                      )}
+                        )}
+
+                        {task.status !== "CANCELLED" && task.status !== "COMPLETED" && (
+                          <button 
+                            onClick={() => handleCancelTask(task.id)}
+                            className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors mt-3"
+                          >
+                            Cancel Task
+                          </button>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Completion Notes display */}
+                    {task.status === "COMPLETED" && task.completionNotes && (
+                      <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-2.5 text-xs text-green-900">
+                        <span className="font-bold">Fulfillment Report: </span>
+                        {task.completionNotes}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
