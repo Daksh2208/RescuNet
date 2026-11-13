@@ -12,7 +12,6 @@ import {
   ChevronUp, 
   Crosshair, 
   Loader2,
-  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -103,7 +102,7 @@ const defaultProtocols: Protocol[] = [
   }
 ];
 
-const disasterIcons: Record<string, LucideIcon> = {
+const disasterIcons: Record<string, any> = {
   FLOOD: Waves,
   EARTHQUAKE: Mountain,
   FIRE: Flame,
